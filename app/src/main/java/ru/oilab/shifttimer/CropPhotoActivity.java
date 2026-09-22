@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.drawable.GradientDrawable;
 import android.media.ExifInterface;
@@ -237,7 +238,9 @@ public class CropPhotoActivity extends Activity {
             super.onDraw(canvas);
             canvas.save();
             RectF frame = new RectF(1, 1, getWidth() - 1, getHeight() - 1);
-            canvas.clipRoundRect(frame, 28f, 28f);
+            Path clippingPath = new Path();
+            clippingPath.addRoundRect(frame, 28f, 28f, Path.Direction.CW);
+            canvas.clipPath(clippingPath);
             canvas.drawBitmap(bitmap, null, new RectF(offsetX, offsetY,
                     offsetX + bitmap.getWidth() * scale,
                     offsetY + bitmap.getHeight() * scale), imagePaint);
