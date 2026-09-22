@@ -26,6 +26,7 @@ import java.util.Locale;
 
 public class ShiftWidgetProvider extends AppWidgetProvider {
     private static final String ACTION_DAY_TICK = "ru.oilab.shifttimer.DAY_TICK";
+    private static final String ACTION_REFRESH = "ru.oilab.shifttimer.REFRESH_WIDGET";
 
     @Override public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
         for (int id : ids) update(context, manager, id);
@@ -44,7 +45,8 @@ public class ShiftWidgetProvider extends AppWidgetProvider {
                 || Intent.ACTION_DATE_CHANGED.equals(action)
                 || Intent.ACTION_BOOT_COMPLETED.equals(action)
                 || Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)
-                || ACTION_DAY_TICK.equals(action)) {
+                || ACTION_DAY_TICK.equals(action)
+                || ACTION_REFRESH.equals(action)) {
             updateAll(context);
         }
     }
@@ -104,6 +106,12 @@ public class ShiftWidgetProvider extends AppWidgetProvider {
         PendingIntent pending = PendingIntent.getActivity(context, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_root, pending);
+
+        Intent refreshIntent = new Intent(context, ShiftWidgetProvider.class)
+                .setAction(ACTION_REFRESH);
+        PendingIntent refreshPending = PendingIntent.getBroadcast(context, 9000 + id,
+                refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        views.setOnClickPendingIntent(R.id.widget_refresh, refreshPending);
         manager.updateAppWidget(id, views);
         scheduleDayBoundary(context, id, remaining);
     }

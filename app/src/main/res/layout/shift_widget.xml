@@ -18,6 +18,20 @@
         android:layout_height="match_parent"
         android:background="@drawable/widget_scrim" />
 
+    <TextView
+        android:id="@+id/widget_refresh"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="top|right"
+        android:layout_marginTop="6dp"
+        android:layout_marginRight="7dp"
+        android:background="@drawable/widget_refresh_background"
+        android:gravity="center"
+        android:text="↻"
+        android:textColor="#F4E1B5"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
