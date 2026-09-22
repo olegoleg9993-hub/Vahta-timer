@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ShiftTimer" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/obsidian</item>
+        <item name="android:navigationBarColor">@color/obsidian</item>
+        <item name="android:colorAccent">@color/champagne</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>

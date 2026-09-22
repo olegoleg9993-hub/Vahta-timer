@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="2160" viewBox="0 0 1080 2160">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#121824"/><stop offset="1" stop-color="#05070a"/>
+    </linearGradient>
+    <radialGradient id="glow"><stop stop-color="#d8b56c" stop-opacity=".2"/><stop offset="1" stop-color="#d8b56c" stop-opacity="0"/></radialGradient>
+    <filter id="shadow"><feGaussianBlur stdDeviation="24"/></filter>
+  </defs>
+  <rect width="1080" height="2160" rx="84" fill="url(#bg)"/>
+  <circle cx="880" cy="260" r="500" fill="url(#glow)"/>
+  <circle cx="110" cy="1510" r="650" fill="#416484" opacity=".07" filter="url(#shadow)"/>
+  <g font-family="Arial, sans-serif" text-anchor="middle">
+    <text x="540" y="190" fill="#d8b56c" font-size="34" font-weight="700" letter-spacing="11">ВАХТА</text>
+    <text x="540" y="252" fill="#747c88" font-size="28" letter-spacing="3">18 СЕН  —  17 НОЯ</text>
+
+    <circle cx="540" cy="745" r="300" fill="none" stroke="#1d232d" stroke-width="26"/>
+    <path d="M540 445 A300 300 0 1 1 318 946" fill="none" stroke="#d8b56c" stroke-width="26" stroke-linecap="round"/>
+    <text x="540" y="660" fill="#959ca8" font-size="28" font-weight="700" letter-spacing="6">ДОМОЙ ЧЕРЕЗ</text>
+    <text x="540" y="765" fill="#f4f1e8" font-size="72" font-weight="700">42:13:18:07</text>
+    <text x="540" y="835" fill="#69717d" font-size="22" font-weight="700" letter-spacing="4">ДНИ      ЧАСЫ      МИН      СЕК</text>
+
+    <rect x="60" y="1230" width="960" height="430" rx="62" fill="#151a22" opacity=".92" stroke="#d8b56c" stroke-opacity=".25" stroke-width="2"/>
+    <text x="118" y="1330" text-anchor="start" fill="#8b929e" font-size="27" font-weight="700" letter-spacing="5">ЗАРАБОТАНО</text>
+    <text x="118" y="1465" text-anchor="start" fill="#f4f1e8" font-size="82" font-weight="700">121 684,37 ₽</text>
+    <line x1="118" y1="1525" x2="962" y2="1525" stroke="#333b47"/>
+    <text x="118" y="1603" text-anchor="start" fill="#6f7682" font-size="24" font-weight="700" letter-spacing="3">К КОНЦУ ВАХТЫ</text>
+    <text x="962" y="1603" text-anchor="end" fill="#d8b56c" font-size="34" font-weight="700">601 290,32 ₽</text>
+
+    <rect x="60" y="1900" width="960" height="150" rx="48" fill="#d8b56c"/>
+    <text x="540" y="1994" fill="#0b0d11" font-size="32" font-weight="700" letter-spacing="4">НАСТРОИТЬ ВАХТУ</text>
+  </g>
+</svg>
