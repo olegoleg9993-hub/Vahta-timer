@@ -2,6 +2,7 @@ package ru.oilab.shifttimer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import java.io.File;
 import java.time.ZonedDateTime;
 
 public final class ShiftPreferences {
@@ -10,6 +11,8 @@ public final class ShiftPreferences {
     private static final String END = "end_epoch";
     private static final String SALARY = "monthly_salary";
     private static final String CONFIGURED = "configured";
+    private static final String WIDGET_PHOTO = "widget_photo";
+    public static final String WIDGET_PHOTO_FILE = "widget_background.jpg";
 
     private ShiftPreferences() {}
 
@@ -36,6 +39,24 @@ public final class ShiftPreferences {
     public static boolean isConfigured(Context context) {
         return context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
                 .getBoolean(CONFIGURED, false);
+    }
+
+    public static boolean hasWidgetPhoto(Context context) {
+        return context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+                .getBoolean(WIDGET_PHOTO, false)
+                && new File(context.getFilesDir(), WIDGET_PHOTO_FILE).isFile();
+    }
+
+    public static void setWidgetPhoto(Context context, boolean enabled) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit()
+                .putBoolean(WIDGET_PHOTO, enabled)
+                .apply();
+    }
+
+    public static void removeWidgetPhoto(Context context) {
+        File photo = new File(context.getFilesDir(), WIDGET_PHOTO_FILE);
+        if (photo.exists()) photo.delete();
+        setWidgetPhoto(context, false);
     }
 
     public static final class ShiftData {

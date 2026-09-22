@@ -27,6 +27,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class SettingsActivity extends Activity {
+    private static final int REQUEST_PHOTO = 301;
+    private static final int REQUEST_CROP = 302;
     private final Locale ru = new Locale("ru", "RU");
     private final DateTimeFormatter display = DateTimeFormatter.ofPattern("dd.MM.yyyy  HH:mm", ru);
     private long startMillis;
@@ -34,6 +36,7 @@ public class SettingsActivity extends Activity {
     private Button startButton;
     private Button endButton;
     private EditText salaryInput;
+    private TextView photoStatus;
     private float d;
 
     @Override public void onCreate(Bundle state) {
@@ -93,6 +96,25 @@ public class SettingsActivity extends Activity {
         hint.setPadding(dp(4), dp(2), 0, dp(30));
         root.addView(hint);
 
+        root.addView(label("ФОН ВИДЖЕТА"));
+        photoStatus = text("", 12, 0xFF87909C, false);
+        photoStatus.setPadding(dp(4), 0, 0, dp(10));
+        root.addView(photoStatus);
+
+        LinearLayout photoRow = new LinearLayout(this);
+        photoRow.setOrientation(LinearLayout.HORIZONTAL);
+        Button choosePhoto = secondaryButton("Выбрать фото");
+        Button removePhoto = secondaryButton("Убрать фон");
+        choosePhoto.setOnClickListener(v -> chooseWidgetPhoto());
+        removePhoto.setOnClickListener(v -> {
+            ShiftPreferences.removeWidgetPhoto(this);
+            ShiftWidgetProvider.updateAll(this);
+            refreshPhotoStatus();
+        });
+        photoRow.addView(choosePhoto, weightedButton(0, dp(5)));
+        photoRow.addView(removePhoto, weightedButton(dp(5), 0));
+        root.addView(photoRow, margins(dp(54), 0, 0, dp(24)));
+
         Button save = new Button(this);
         save.setText("СОХРАНИТЬ И ЗАПУСТИТЬ");
         save.setTextColor(0xFF0B0D11);
@@ -114,6 +136,7 @@ public class SettingsActivity extends Activity {
         root.addView(widget, margins(dp(58), 0, dp(14), 0));
 
         refreshDates();
+        refreshPhotoStatus();
         setContentView(scroll);
         } catch (Throwable error) {
             TextView crash = new TextView(this);
@@ -124,6 +147,34 @@ public class SettingsActivity extends Activity {
             crash.setBackgroundColor(0xFF4A1010);
             setContentView(crash);
         }
+    }
+
+    private void chooseWidgetPhoto() {
+        Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        pick.addCategory(Intent.CATEGORY_OPENABLE);
+        pick.setType("image/*");
+        startActivityForResult(pick, REQUEST_PHOTO);
+    }
+
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (resultCode != RESULT_OK) return;
+        if (requestCode == REQUEST_PHOTO && intent != null && intent.getData() != null) {
+            Intent crop = new Intent(this, CropPhotoActivity.class);
+            crop.setData(intent.getData());
+            crop.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivityForResult(crop, REQUEST_CROP);
+        } else if (requestCode == REQUEST_CROP) {
+            refreshPhotoStatus();
+            ShiftWidgetProvider.updateAll(this);
+        }
+    }
+
+    private void refreshPhotoStatus() {
+        if (photoStatus == null) return;
+        photoStatus.setText(ShiftPreferences.hasWidgetPhoto(this)
+                ? "Фото установлено. Оно автоматически подгоняется под размер виджета."
+                : "Без фото используется тёмный премиальный фон.");
     }
 
     private void chooseDateTime(boolean start) {
@@ -188,6 +239,22 @@ public class SettingsActivity extends Activity {
         b.setPadding(dp(18), 0, dp(18), 0);
         b.setBackground(fieldBackground());
         return b;
+    }
+
+    private Button secondaryButton(String title) {
+        Button b = new Button(this);
+        b.setText(title);
+        b.setTextColor(0xFFE2BF75);
+        b.setTextSize(12);
+        b.setAllCaps(false);
+        b.setBackground(rounded(0xFF121923, 16, 0x445B4B31, 1));
+        return b;
+    }
+
+    private LinearLayout.LayoutParams weightedButton(int left, int right) {
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, -1, 1f);
+        p.setMargins(left, 0, right, 0);
+        return p;
     }
 
     private TextView label(String value) {

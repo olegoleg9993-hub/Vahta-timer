@@ -17,6 +17,8 @@ import android.widget.TextView;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.NumberFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +35,7 @@ public class MainActivity extends Activity {
     private TextView earnedText;
     private TextView totalText;
     private ProgressBar progress;
+    private TextView progressText;
     private float density;
     private ShiftPreferences.ShiftData data;
 
@@ -66,14 +69,14 @@ public class MainActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setGravity(Gravity.CENTER_HORIZONTAL);
-        root.setPadding(dp(22), dp(52), dp(22), dp(30));
+        root.setPadding(dp(20), dp(34), dp(20), dp(28));
         scroll.addView(root, new ScrollView.LayoutParams(-1, -2));
 
-        TextView brand = text("ВАХТА", 15, 0xFFD8B56C, true);
+        TextView brand = text("ВАХТА  •  LIVE", 13, 0xFFE2BF75, true);
         brand.setLetterSpacing(.18f);
         root.addView(brand);
         periodText = text("", 13, 0xFF7D8591, false);
-        periodText.setPadding(0, dp(12), 0, dp(42));
+        periodText.setPadding(0, dp(9), 0, dp(26));
         root.addView(periodText);
 
         LinearLayout timerCard = card();
@@ -87,12 +90,16 @@ public class MainActivity extends Activity {
         units.setLetterSpacing(.05f);
         timerCard.addView(units);
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progress.setMax(1000);
+        progress.setMax(100000);
         progress.setProgressTintList(android.content.res.ColorStateList.valueOf(0xFFD8B56C));
         LinearLayout.LayoutParams progressParams = new LinearLayout.LayoutParams(-1, dp(5));
         progressParams.setMargins(0, dp(28), 0, 0);
         timerCard.addView(progress, progressParams);
-        root.addView(timerCard, blockParams(dp(230), 0, dp(20)));
+        progressText = text("0,000% ВАХТЫ ЗАВЕРШЕНО", 9, 0xFF7F8896, true);
+        progressText.setLetterSpacing(.05f);
+        progressText.setPadding(0, dp(8), 0, 0);
+        timerCard.addView(progressText);
+        root.addView(timerCard, blockParams(dp(218), 0, dp(16)));
 
         LinearLayout moneyCard = card();
         TextView earnedLabel = text("ЗАРАБОТАНО", 11, 0xFF8B929E, true);
@@ -109,7 +116,7 @@ public class MainActivity extends Activity {
         totalText.setGravity(Gravity.START);
         totalText.setPadding(0, dp(8), 0, 0);
         moneyCard.addView(totalText, new LinearLayout.LayoutParams(-1, -2));
-        root.addView(moneyCard, blockParams(dp(245), 0, dp(24)));
+        root.addView(moneyCard, blockParams(dp(215), 0, dp(20)));
 
         Button settings = new Button(this);
         settings.setText("НАСТРОИТЬ ВАХТУ");
@@ -153,7 +160,9 @@ public class MainActivity extends Activity {
                 seconds / 86400, (seconds / 3600) % 24, (seconds / 60) % 60, seconds % 60));
         earnedText.setText(money.format(r.earned) + " ₽");
         totalText.setText(money.format(r.total) + " ₽");
-        progress.setProgress((int) Math.round(r.progress * 1000));
+        progress.setProgress((int) Math.round(r.progress * 100000));
+        DecimalFormat percent = new DecimalFormat("0.000", DecimalFormatSymbols.getInstance(ru));
+        progressText.setText(percent.format(r.progress * 100d) + "% ВАХТЫ ЗАВЕРШЕНО");
         ZoneId zone = ZoneId.systemDefault();
         periodText.setText(date.format(Instant.ofEpochMilli(data.startMillis).atZone(zone))
                 + "  —  " + date.format(Instant.ofEpochMilli(data.endMillis).atZone(zone)));
@@ -164,7 +173,7 @@ public class MainActivity extends Activity {
         card.setOrientation(LinearLayout.VERTICAL);
         card.setGravity(Gravity.CENTER);
         card.setPadding(dp(24), dp(28), dp(24), dp(28));
-        card.setBackground(round(0xDD151A22, 25, 0x33D8B56C, 1));
+        card.setBackground(round(0xE6121923, 25, 0x445B4B31, 1));
         return card;
     }
 
