@@ -63,7 +63,7 @@ public class ShiftWidgetProvider extends AppWidgetProvider {
         SalaryCalculator.Result result = SalaryCalculator.calculate(data.startMillis, data.endMillis,
                 now, data.monthlySalary, ZoneId.systemDefault());
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.shift_widget);
-        boolean supporter = ShiftPreferences.isSupporter(context);
+        boolean supporter = !BuildConfig.DEBUG || ShiftPreferences.isSupporter(context);
         float density = context.getResources().getDisplayMetrics().density;
         views.setViewVisibility(R.id.widget_support, supporter ? View.GONE : View.VISIBLE);
         views.setViewPadding(R.id.widget_content,

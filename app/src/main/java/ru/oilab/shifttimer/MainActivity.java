@@ -138,7 +138,22 @@ public class MainActivity extends Activity {
         support.setOnClickListener(v -> Toast.makeText(this,
                 "Скоро здесь будет безопасная поддержка через RuStore",
                 Toast.LENGTH_LONG).show());
-        root.addView(support, blockParams(dp(52), 0, 0));
+        if (BuildConfig.DEBUG) root.addView(support, blockParams(dp(52), 0, 0));
+
+        TextView feedbackTitle = text("Нашли ошибку или есть идея?", 16, 0xFFF4F1E8, true);
+        feedbackTitle.setPadding(0, dp(25), 0, dp(7));
+        root.addView(feedbackTitle);
+        TextView feedbackHint = text("Напишите разработчику в MAX. Расскажите, что не работает или чего не хватает в приложении.",
+                12, 0xFF9AA2AD, false);
+        root.addView(feedbackHint);
+        Button feedback = new Button(this);
+        feedback.setText("Написать в MAX");
+        feedback.setAllCaps(false);
+        feedback.setTextColor(0xFFE2BF75);
+        feedback.setTextSize(13);
+        feedback.setBackground(round(0x66121923, 18, 0x665B4B31, 1));
+        feedback.setOnClickListener(v -> sendFeedback());
+        root.addView(feedback, blockParams(dp(52), dp(14), 0));
 
         setContentView(scroll);
         data = ShiftPreferences.load(this);
@@ -188,6 +203,17 @@ public class MainActivity extends Activity {
         card.setPadding(dp(24), dp(28), dp(24), dp(28));
         card.setBackground(round(0xE6121923, 25, 0x445B4B31, 1));
         return card;
+    }
+
+    private void sendFeedback() {
+        Intent send = new Intent(Intent.ACTION_SEND);
+        send.setType("text/plain");
+        send.putExtra(Intent.EXTRA_TEXT, "Здравствуйте, Олег! Пишу по приложению «Таймер вахтовика».\n\n");
+        try {
+            startActivity(Intent.createChooser(send, "Выберите MAX и чат с Олегом"));
+        } catch (android.content.ActivityNotFoundException error) {
+            Toast.makeText(this, "Установите MAX, чтобы отправить сообщение", Toast.LENGTH_LONG).show();
+        }
     }
 
     private TextView text(String value, int size, int color, boolean bold) {

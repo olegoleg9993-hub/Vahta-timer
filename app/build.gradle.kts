@@ -5,13 +5,14 @@ plugins {
 android {
     namespace = "ru.oilab.shifttimer"
     compileSdk = 35
+    buildFeatures { buildConfig = true }
 
     defaultConfig {
         applicationId = "ru.oilab.shifttimer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 7
-        versionName = "0.2.4"
+        versionCode = 8
+        versionName = "0.2.5"
     }
 
     buildTypes {

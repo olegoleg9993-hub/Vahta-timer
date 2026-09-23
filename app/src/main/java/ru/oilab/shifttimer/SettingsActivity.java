@@ -137,7 +137,7 @@ public class SettingsActivity extends Activity {
 
         TextView supportTitle = label("ПОДДЕРЖАТЬ ПРОЕКТ");
         supportTitle.setPadding(dp(4), dp(24), 0, dp(8));
-        root.addView(supportTitle);
+        if (BuildConfig.DEBUG) root.addView(supportTitle);
 
         Button support = new Button(this);
         support.setText("Разработчику на доширак  🍜");
@@ -148,12 +148,12 @@ public class SettingsActivity extends Activity {
         support.setOnClickListener(v -> Toast.makeText(this,
                 "Подключим безопасную оплату через RuStore после публикации приложения",
                 Toast.LENGTH_LONG).show());
-        root.addView(support, margins(dp(54), 0, dp(8), 0));
+        if (BuildConfig.DEBUG) root.addView(support, margins(dp(54), 0, dp(8), 0));
 
         TextView supportHint = text("Добровольная поддержка без рекламы и платных ограничений. Скоро.",
                 11, 0xFF6E7580, false);
         supportHint.setPadding(dp(5), dp(7), dp(5), 0);
-        root.addView(supportHint);
+        if (BuildConfig.DEBUG) root.addView(supportHint);
 
         refreshDates();
         refreshPhotoStatus();
