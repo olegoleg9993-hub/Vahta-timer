@@ -72,9 +72,14 @@ public class MainActivity extends Activity {
                 new int[]{0xFF131A25, 0xFF07090D}));
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setGravity(Gravity.CENTER_HORIZONTAL);
-        root.setPadding(dp(18), dp(15), dp(18), dp(14));
+        root.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+        root.setPadding(dp(18), dp(15), dp(18), dp(15));
         scroll.addView(root, new ScrollView.LayoutParams(-1, -2));
+        scroll.setOnApplyWindowInsetsListener((view, insets) -> {
+            root.setPadding(dp(18), insets.getSystemWindowInsetTop() + dp(15),
+                    dp(18), insets.getSystemWindowInsetBottom() + dp(15));
+            return insets;
+        });
 
         TextView brand = text("ВАХТА  •  LIVE", 13, 0xFFE2BF75, true);
         brand.setLetterSpacing(.18f);
@@ -103,8 +108,8 @@ public class MainActivity extends Activity {
         progressText.setLetterSpacing(.05f);
         progressText.setPadding(0, dp(5), 0, 0);
         timerCard.addView(progressText);
-        timerCard.setMinimumHeight(dp(148));
-        root.addView(timerCard, blockParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, dp(10)));
+        timerCard.setMinimumHeight(dp(170));
+        root.addView(timerCard, blockParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, dp(12)));
 
         LinearLayout moneyCard = card();
         TextView earnedLabel = text("ЗАРАБОТАНО", 11, 0xFF8B929E, true);
@@ -121,8 +126,8 @@ public class MainActivity extends Activity {
         totalText.setGravity(Gravity.START);
         totalText.setPadding(0, dp(5), 0, 0);
         moneyCard.addView(totalText, new LinearLayout.LayoutParams(-1, -2));
-        moneyCard.setMinimumHeight(dp(138));
-        root.addView(moneyCard, blockParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, dp(12)));
+        moneyCard.setMinimumHeight(dp(164));
+        root.addView(moneyCard, blockParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, dp(14)));
 
         Button settings = new Button(this);
         settings.setText("НАСТРОИТЬ ВАХТУ");
@@ -149,10 +154,8 @@ public class MainActivity extends Activity {
         support.setAllCaps(false);
         support.setTypeface(null, android.graphics.Typeface.BOLD);
         support.setBackground(round(0x66121923, 18, 0x665B4B31, 1));
-        support.setOnClickListener(v -> Toast.makeText(this,
-                "Скоро здесь будет безопасная поддержка через RuStore",
-                Toast.LENGTH_LONG).show());
-        if (BuildConfig.DEBUG) root.addView(support, blockParams(dp(52), 0, 0));
+        support.setOnClickListener(v -> showSupportInfo());
+        root.addView(support, blockParams(dp(45), 0, 0));
 
         TextView feedbackTitle = text("Нашли ошибку или есть идея?", 16, 0xFFF4F1E8, true);
         feedbackTitle.setPadding(0, dp(12), 0, dp(4));
@@ -214,7 +217,7 @@ public class MainActivity extends Activity {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setGravity(Gravity.CENTER);
-        card.setPadding(dp(20), dp(14), dp(20), dp(14));
+        card.setPadding(dp(20), dp(18), dp(20), dp(18));
         card.setBackground(round(0xE6121923, 25, 0x445B4B31, 1));
         return card;
     }
@@ -227,6 +230,14 @@ public class MainActivity extends Activity {
         } catch (android.content.ActivityNotFoundException error) {
             Toast.makeText(this, "Не удалось открыть ссылку MAX", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void showSupportInfo() {
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Поддержать разработчика")
+                .setMessage("Спасибо! Оплата через RuStore пока не подключена. Как только она появится, поддержать проект можно будет здесь.")
+                .setPositiveButton("Понятно", null)
+                .show();
     }
 
     private void pinWidget() {

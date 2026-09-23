@@ -56,6 +56,11 @@ public class SettingsActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(20), dp(14), dp(20), dp(16));
         scroll.addView(root, new ScrollView.LayoutParams(-1, -2));
+        scroll.setOnApplyWindowInsetsListener((view, insets) -> {
+            root.setPadding(dp(20), insets.getSystemWindowInsetTop() + dp(14),
+                    dp(20), insets.getSystemWindowInsetBottom() + dp(16));
+            return insets;
+        });
 
         TextView back = text("‹  Назад", 15, 0xFFD8B56C, false);
         back.setPadding(0, dp(2), 0, dp(7));
@@ -135,8 +140,8 @@ public class SettingsActivity extends Activity {
         root.addView(widget, margins(dp(42), 0, dp(7), 0));
 
         TextView supportTitle = label("ПОДДЕРЖАТЬ ПРОЕКТ");
-        supportTitle.setPadding(dp(4), dp(24), 0, dp(8));
-        if (BuildConfig.DEBUG) root.addView(supportTitle);
+        supportTitle.setPadding(dp(4), dp(9), 0, dp(5));
+        root.addView(supportTitle);
 
         Button support = new Button(this);
         support.setText("Разработчику на доширак  🍜");
@@ -144,15 +149,17 @@ public class SettingsActivity extends Activity {
         support.setTextSize(13);
         support.setAllCaps(false);
         support.setBackground(rounded(0xFF111720, 18, 0x556F5A31, 1));
-        support.setOnClickListener(v -> Toast.makeText(this,
-                "Подключим безопасную оплату через RuStore после публикации приложения",
-                Toast.LENGTH_LONG).show());
-        if (BuildConfig.DEBUG) root.addView(support, margins(dp(54), 0, dp(8), 0));
+        support.setOnClickListener(v -> new android.app.AlertDialog.Builder(this)
+                .setTitle("Поддержать разработчика")
+                .setMessage("Спасибо! Оплата через RuStore пока не подключена. Как только она появится, поддержать проект можно будет здесь.")
+                .setPositiveButton("Понятно", null)
+                .show());
+        root.addView(support, margins(dp(45), 0, dp(4), 0));
 
-        TextView supportHint = text("Добровольная поддержка без рекламы и платных ограничений. Скоро.",
+        TextView supportHint = text("Добровольная поддержка через RuStore появится позже.",
                 11, 0xFF6E7580, false);
-        supportHint.setPadding(dp(5), dp(7), dp(5), 0);
-        if (BuildConfig.DEBUG) root.addView(supportHint);
+        supportHint.setPadding(dp(5), dp(3), dp(5), 0);
+        root.addView(supportHint);
 
         refreshDates();
         refreshPhotoStatus();
