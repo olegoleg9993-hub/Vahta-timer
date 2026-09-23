@@ -1,6 +1,8 @@
 package ru.oilab.shifttimer;
 
 import android.app.Activity;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 import android.graphics.Color;
@@ -71,14 +73,14 @@ public class MainActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setGravity(Gravity.CENTER_HORIZONTAL);
-        root.setPadding(dp(20), dp(34), dp(20), dp(28));
+        root.setPadding(dp(18), dp(15), dp(18), dp(14));
         scroll.addView(root, new ScrollView.LayoutParams(-1, -2));
 
         TextView brand = text("ВАХТА  •  LIVE", 13, 0xFFE2BF75, true);
         brand.setLetterSpacing(.18f);
         root.addView(brand);
         periodText = text("", 13, 0xFF7D8591, false);
-        periodText.setPadding(0, dp(9), 0, dp(26));
+        periodText.setPadding(0, dp(5), 0, dp(12));
         root.addView(periodText);
 
         LinearLayout timerCard = card();
@@ -86,7 +88,7 @@ public class MainActivity extends Activity {
         stateText.setLetterSpacing(.10f);
         timerCard.addView(stateText);
         countdownText = text("00:00:00:00", 31, 0xFFF4F1E8, true);
-        countdownText.setPadding(0, dp(15), 0, dp(8));
+        countdownText.setPadding(0, dp(8), 0, dp(4));
         timerCard.addView(countdownText);
         TextView units = text("ДНИ     ЧАСЫ     МИН     СЕК", 10, 0xFF6E7682, true);
         units.setLetterSpacing(.05f);
@@ -95,13 +97,14 @@ public class MainActivity extends Activity {
         progress.setMax(100000);
         progress.setProgressTintList(android.content.res.ColorStateList.valueOf(0xFFD8B56C));
         LinearLayout.LayoutParams progressParams = new LinearLayout.LayoutParams(-1, dp(5));
-        progressParams.setMargins(0, dp(28), 0, 0);
+        progressParams.setMargins(0, dp(13), 0, 0);
         timerCard.addView(progress, progressParams);
         progressText = text("0,000% ВАХТЫ ЗАВЕРШЕНО", 9, 0xFF7F8896, true);
         progressText.setLetterSpacing(.05f);
-        progressText.setPadding(0, dp(8), 0, 0);
+        progressText.setPadding(0, dp(5), 0, 0);
         timerCard.addView(progressText);
-        root.addView(timerCard, blockParams(dp(218), 0, dp(16)));
+        timerCard.setMinimumHeight(dp(148));
+        root.addView(timerCard, blockParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, dp(10)));
 
         LinearLayout moneyCard = card();
         TextView earnedLabel = text("ЗАРАБОТАНО", 11, 0xFF8B929E, true);
@@ -109,16 +112,17 @@ public class MainActivity extends Activity {
         moneyCard.addView(earnedLabel, new LinearLayout.LayoutParams(-1, -2));
         earnedText = text("0,00 ₽", 31, 0xFFF4F1E8, true);
         earnedText.setGravity(Gravity.START);
-        earnedText.setPadding(0, dp(13), 0, dp(29));
+        earnedText.setPadding(0, dp(8), 0, dp(13));
         moneyCard.addView(earnedText, new LinearLayout.LayoutParams(-1, -2));
         TextView totalLabel = text("К КОНЦУ ВАХТЫ", 10, 0xFF6F7682, true);
         totalLabel.setGravity(Gravity.START);
         moneyCard.addView(totalLabel, new LinearLayout.LayoutParams(-1, -2));
         totalText = text("0,00 ₽", 18, 0xFFD8B56C, true);
         totalText.setGravity(Gravity.START);
-        totalText.setPadding(0, dp(8), 0, 0);
+        totalText.setPadding(0, dp(5), 0, 0);
         moneyCard.addView(totalText, new LinearLayout.LayoutParams(-1, -2));
-        root.addView(moneyCard, blockParams(dp(215), 0, dp(20)));
+        moneyCard.setMinimumHeight(dp(138));
+        root.addView(moneyCard, blockParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, dp(12)));
 
         Button settings = new Button(this);
         settings.setText("НАСТРОИТЬ ВАХТУ");
@@ -127,7 +131,16 @@ public class MainActivity extends Activity {
         settings.setTypeface(null, android.graphics.Typeface.BOLD);
         settings.setBackground(round(0xFFD8B56C, 20, 0, 0));
         settings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
-        root.addView(settings, blockParams(dp(62), 0, dp(12)));
+        root.addView(settings, blockParams(dp(48), 0, dp(7)));
+
+        Button widget = new Button(this);
+        widget.setText("Добавить виджет");
+        widget.setAllCaps(false);
+        widget.setTextColor(0xFFE2BF75);
+        widget.setTextSize(13);
+        widget.setBackground(round(0x66121923, 18, 0x665B4B31, 1));
+        widget.setOnClickListener(v -> pinWidget());
+        root.addView(widget, blockParams(dp(44), 0, dp(3)));
 
         Button support = new Button(this);
         support.setText("Разработчику на доширак  🍜");
@@ -142,7 +155,7 @@ public class MainActivity extends Activity {
         if (BuildConfig.DEBUG) root.addView(support, blockParams(dp(52), 0, 0));
 
         TextView feedbackTitle = text("Нашли ошибку или есть идея?", 16, 0xFFF4F1E8, true);
-        feedbackTitle.setPadding(0, dp(25), 0, dp(7));
+        feedbackTitle.setPadding(0, dp(12), 0, dp(4));
         root.addView(feedbackTitle);
         TextView feedbackHint = text("Напишите разработчику в MAX. Расскажите, что не работает или чего не хватает в приложении.",
                 12, 0xFF9AA2AD, false);
@@ -154,7 +167,7 @@ public class MainActivity extends Activity {
         feedback.setTextSize(13);
         feedback.setBackground(round(0x66121923, 18, 0x665B4B31, 1));
         feedback.setOnClickListener(v -> sendFeedback());
-        root.addView(feedback, blockParams(dp(52), dp(14), 0));
+        root.addView(feedback, blockParams(dp(42), dp(7), 0));
 
         setContentView(scroll);
         data = ShiftPreferences.load(this);
@@ -201,7 +214,7 @@ public class MainActivity extends Activity {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setGravity(Gravity.CENTER);
-        card.setPadding(dp(24), dp(28), dp(24), dp(28));
+        card.setPadding(dp(20), dp(14), dp(20), dp(14));
         card.setBackground(round(0xE6121923, 25, 0x445B4B31, 1));
         return card;
     }
@@ -213,6 +226,16 @@ public class MainActivity extends Activity {
             startActivity(openProfile);
         } catch (android.content.ActivityNotFoundException error) {
             Toast.makeText(this, "Не удалось открыть ссылку MAX", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void pinWidget() {
+        AppWidgetManager manager = getSystemService(AppWidgetManager.class);
+        if (manager != null && manager.isRequestPinAppWidgetSupported()) {
+            manager.requestPinAppWidget(new ComponentName(this, ShiftWidgetProvider.class), null, null);
+        } else {
+            Toast.makeText(this, "Добавьте виджет «Таймер вахтовика» через меню виджетов телефона",
+                    Toast.LENGTH_LONG).show();
         }
     }
 
