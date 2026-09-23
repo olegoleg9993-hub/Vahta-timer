@@ -106,6 +106,7 @@ public class ShiftWidgetProvider extends AppWidgetProvider {
         PendingIntent pending = PendingIntent.getActivity(context, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_root, pending);
+        views.setOnClickPendingIntent(R.id.widget_support, pending);
 
         Intent refreshIntent = new Intent(context, ShiftWidgetProvider.class)
                 .setAction(ACTION_REFRESH);

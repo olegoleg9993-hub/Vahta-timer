@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.NumberFormat;
@@ -125,7 +126,19 @@ public class MainActivity extends Activity {
         settings.setTypeface(null, android.graphics.Typeface.BOLD);
         settings.setBackground(round(0xFFD8B56C, 20, 0, 0));
         settings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
-        root.addView(settings, blockParams(dp(62), 0, 0));
+        root.addView(settings, blockParams(dp(62), 0, dp(12)));
+
+        Button support = new Button(this);
+        support.setText("Разработчику на доширак  🍜");
+        support.setTextColor(0xFFE2BF75);
+        support.setTextSize(12);
+        support.setAllCaps(false);
+        support.setTypeface(null, android.graphics.Typeface.BOLD);
+        support.setBackground(round(0x66121923, 18, 0x665B4B31, 1));
+        support.setOnClickListener(v -> Toast.makeText(this,
+                "Скоро здесь будет безопасная поддержка через RuStore",
+                Toast.LENGTH_LONG).show());
+        root.addView(support, blockParams(dp(52), 0, 0));
 
         setContentView(scroll);
         data = ShiftPreferences.load(this);

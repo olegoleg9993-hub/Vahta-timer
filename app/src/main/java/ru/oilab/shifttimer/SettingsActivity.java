@@ -228,7 +228,7 @@ public class SettingsActivity extends Activity {
         }
         ShiftPreferences.save(this, new ShiftPreferences.ShiftData(startMillis, endMillis, salary));
         ShiftWidgetProvider.updateAll(this);
-        finish();
+        Toast.makeText(this, "Вахта сохранена и запущена", Toast.LENGTH_LONG).show();
     }
 
     private void pinWidget() {
