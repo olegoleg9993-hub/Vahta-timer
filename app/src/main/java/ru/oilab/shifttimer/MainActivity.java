@@ -233,11 +233,7 @@ public class MainActivity extends Activity {
     }
 
     private void showSupportInfo() {
-        new android.app.AlertDialog.Builder(this)
-                .setTitle("Поддержать разработчика")
-                .setMessage("Спасибо! Оплата через RuStore пока не подключена. Как только она появится, поддержать проект можно будет здесь.")
-                .setPositiveButton("Понятно", null)
-                .show();
+        startActivity(new Intent(this, SupportActivity.class));
     }
 
     private void pinWidget() {

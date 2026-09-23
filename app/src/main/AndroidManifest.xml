@@ -8,6 +8,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShiftTimer">
 
+        <activity android:name=".SupportActivity" android:exported="false" />
+
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />

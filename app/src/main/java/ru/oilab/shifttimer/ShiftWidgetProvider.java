@@ -63,7 +63,7 @@ public class ShiftWidgetProvider extends AppWidgetProvider {
         SalaryCalculator.Result result = SalaryCalculator.calculate(data.startMillis, data.endMillis,
                 now, data.monthlySalary, ZoneId.systemDefault());
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.shift_widget);
-        boolean supporter = !BuildConfig.DEBUG || ShiftPreferences.isSupporter(context);
+        boolean supporter = ShiftPreferences.isSupporter(context);
         float density = context.getResources().getDisplayMetrics().density;
         views.setViewVisibility(R.id.widget_support, supporter ? View.GONE : View.VISIBLE);
         views.setViewPadding(R.id.widget_content,
@@ -112,7 +112,12 @@ public class ShiftWidgetProvider extends AppWidgetProvider {
         PendingIntent pending = PendingIntent.getActivity(context, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_root, pending);
-        if (!supporter) views.setOnClickPendingIntent(R.id.widget_support, pending);
+        if (!supporter) {
+            PendingIntent supportPending = PendingIntent.getActivity(context, 9100 + id,
+                    new Intent(context, SupportActivity.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            views.setOnClickPendingIntent(R.id.widget_support, supportPending);
+        }
 
         Intent refreshIntent = new Intent(context, ShiftWidgetProvider.class)
                 .setAction(ACTION_REFRESH);

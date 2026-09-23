@@ -149,14 +149,10 @@ public class SettingsActivity extends Activity {
         support.setTextSize(13);
         support.setAllCaps(false);
         support.setBackground(rounded(0xFF111720, 18, 0x556F5A31, 1));
-        support.setOnClickListener(v -> new android.app.AlertDialog.Builder(this)
-                .setTitle("Поддержать разработчика")
-                .setMessage("Спасибо! Оплата через RuStore пока не подключена. Как только она появится, поддержать проект можно будет здесь.")
-                .setPositiveButton("Понятно", null)
-                .show());
+        support.setOnClickListener(v -> startActivity(new Intent(this, SupportActivity.class)));
         root.addView(support, margins(dp(45), 0, dp(4), 0));
 
-        TextView supportHint = text("Добровольная поддержка через RuStore появится позже.",
+        TextView supportHint = text("Любая сумма от 99 ₽ уберёт надпись о поддержке с виджета после оплаты.",
                 11, 0xFF6E7580, false);
         supportHint.setPadding(dp(5), dp(3), dp(5), 0);
         root.addView(supportHint);
