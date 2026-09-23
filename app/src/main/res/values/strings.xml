@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="rustore_console_app_id" translatable="false">2063760358</string>
+    <string name="rustore_pay_scheme" translatable="false">ruoilabshifttimerpay</string>
     <string name="app_name">Таймер вахтовика</string>
     <string name="widget_description">Обратный отсчёт до межвахты и заработок</string>
 </resources>
