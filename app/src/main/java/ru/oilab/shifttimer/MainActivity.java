@@ -2,6 +2,7 @@ package ru.oilab.shifttimer;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -206,13 +207,12 @@ public class MainActivity extends Activity {
     }
 
     private void sendFeedback() {
-        Intent send = new Intent(Intent.ACTION_SEND);
-        send.setType("text/plain");
-        send.putExtra(Intent.EXTRA_TEXT, "Здравствуйте, Олег! Пишу по приложению «Таймер вахтовика».\n\n");
+        Intent openProfile = new Intent(Intent.ACTION_VIEW, Uri.parse(
+                "https://max.ru/u/f9LHodD0cOLhDfiOk3kt78i9rHODbyY58oho6L8RV7BgMvVKWIrsftmGgfo"));
         try {
-            startActivity(Intent.createChooser(send, "Выберите MAX и чат с Олегом"));
+            startActivity(openProfile);
         } catch (android.content.ActivityNotFoundException error) {
-            Toast.makeText(this, "Установите MAX, чтобы отправить сообщение", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Не удалось открыть ссылку MAX", Toast.LENGTH_LONG).show();
         }
     }
 
