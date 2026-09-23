@@ -11,8 +11,8 @@ android {
         applicationId = "ru.oilab.shifttimer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 13
-        versionName = "0.3.0"
+        versionCode = 12
+        versionName = "0.2.9"
     }
 
     buildTypes {
@@ -26,9 +26,4 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-}
-
-dependencies {
-    implementation(platform("ru.rustore.sdk:bom:2026.08.01"))
-    implementation("ru.rustore.sdk:pay")
 }

@@ -8,17 +8,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShiftTimer">
 
-        <meta-data android:name="console_app_id_value" android:value="@string/rustore_console_app_id" />
-        <meta-data android:name="sdk_pay_scheme_value" android:value="@string/rustore_pay_scheme" />
-
-        <activity android:name=".SupportActivity" android:exported="true" android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="ruoilabshifttimerpay" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".SupportActivity" android:exported="false" />
 
         <activity
             android:name=".SettingsActivity"

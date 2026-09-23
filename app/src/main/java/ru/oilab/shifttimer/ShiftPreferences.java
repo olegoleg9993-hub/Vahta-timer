@@ -67,12 +67,8 @@ public final class ShiftPreferences {
 
     // Call only after the store confirms a completed purchase.
     static void markSupporterAfterPurchase(Context context) {
-        setSupporter(context, true);
-    }
-
-    static void setSupporter(Context context, boolean paid) {
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit()
-                .putBoolean(SUPPORTER, paid)
+                .putBoolean(SUPPORTER, true)
                 .apply();
         ShiftWidgetProvider.updateAll(context);
     }
