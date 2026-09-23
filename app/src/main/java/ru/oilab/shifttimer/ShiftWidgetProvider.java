@@ -15,7 +15,6 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.view.View;
 import android.widget.RemoteViews;
 import java.io.File;
 import java.text.DecimalFormat;
@@ -63,12 +62,10 @@ public class ShiftWidgetProvider extends AppWidgetProvider {
         SalaryCalculator.Result result = SalaryCalculator.calculate(data.startMillis, data.endMillis,
                 now, data.monthlySalary, ZoneId.systemDefault());
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.shift_widget);
-        boolean supporter = ShiftPreferences.isSupporter(context);
         float density = context.getResources().getDisplayMetrics().density;
-        views.setViewVisibility(R.id.widget_support, supporter ? View.GONE : View.VISIBLE);
         views.setViewPadding(R.id.widget_content,
                 Math.round(18 * density), Math.round(12 * density),
-                Math.round(18 * density), Math.round((supporter ? 12 : 46) * density));
+                Math.round(18 * density), Math.round(12 * density));
 
         long target = now < data.startMillis ? data.startMillis : data.endMillis;
         long remaining = Math.max(0L, target - now);
@@ -103,22 +100,15 @@ public class ShiftWidgetProvider extends AppWidgetProvider {
         if (ShiftPreferences.hasWidgetPhoto(context)) {
             Bitmap photo = createWidgetPhoto(context, manager.getAppWidgetOptions(id));
             if (photo != null) {
-                views.setViewVisibility(R.id.widget_photo, View.VISIBLE);
+                views.setViewVisibility(R.id.widget_photo, android.view.View.VISIBLE);
                 views.setImageViewBitmap(R.id.widget_photo, photo);
-            } else views.setViewVisibility(R.id.widget_photo, View.GONE);
-        } else views.setViewVisibility(R.id.widget_photo, View.GONE);
+            } else views.setViewVisibility(R.id.widget_photo, android.view.View.GONE);
+        } else views.setViewVisibility(R.id.widget_photo, android.view.View.GONE);
 
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pending = PendingIntent.getActivity(context, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_root, pending);
-        if (!supporter) {
-            PendingIntent supportPending = PendingIntent.getActivity(context, 9100 + id,
-                    new Intent(context, SupportActivity.class),
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            views.setOnClickPendingIntent(R.id.widget_support, supportPending);
-        }
-
         Intent refreshIntent = new Intent(context, ShiftWidgetProvider.class)
                 .setAction(ACTION_REFRESH);
         PendingIntent refreshPending = PendingIntent.getBroadcast(context, 9000 + id,

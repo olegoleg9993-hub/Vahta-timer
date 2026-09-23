@@ -41,7 +41,7 @@
         android:paddingLeft="18dp"
         android:paddingTop="12dp"
         android:paddingRight="18dp"
-        android:paddingBottom="46dp">
+        android:paddingBottom="12dp">
 
         <TextView
             android:id="@+id/widget_label"
@@ -108,19 +108,4 @@
             android:textSize="9sp" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/widget_support"
-        android:layout_width="match_parent"
-        android:layout_height="42dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginLeft="14dp"
-        android:layout_marginRight="14dp"
-        android:layout_marginBottom="6dp"
-        android:gravity="center"
-        android:maxLines="2"
-        android:includeFontPadding="false"
-        android:lineSpacingExtra="2dp"
-        android:text="Нравится виджет? Поддержите\nразработчика и уберите эту надпись"
-        android:textColor="#B7A47F"
-        android:textSize="10sp" />
 </FrameLayout>

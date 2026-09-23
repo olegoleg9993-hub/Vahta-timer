@@ -12,7 +12,6 @@ public final class ShiftPreferences {
     private static final String SALARY = "monthly_salary";
     private static final String CONFIGURED = "configured";
     private static final String WIDGET_PHOTO = "widget_photo";
-    private static final String SUPPORTER = "supporter";
     public static final String WIDGET_PHOTO_FILE = "widget_background.jpg";
 
     private ShiftPreferences() {}
@@ -58,19 +57,6 @@ public final class ShiftPreferences {
         File photo = new File(context.getFilesDir(), WIDGET_PHOTO_FILE);
         if (photo.exists()) photo.delete();
         setWidgetPhoto(context, false);
-    }
-
-    static boolean isSupporter(Context context) {
-        return context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
-                .getBoolean(SUPPORTER, false);
-    }
-
-    // Call only after the store confirms a completed purchase.
-    static void markSupporterAfterPurchase(Context context) {
-        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit()
-                .putBoolean(SUPPORTER, true)
-                .apply();
-        ShiftWidgetProvider.updateAll(context);
     }
 
     public static final class ShiftData {

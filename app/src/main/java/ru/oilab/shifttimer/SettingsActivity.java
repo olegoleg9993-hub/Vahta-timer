@@ -139,24 +139,6 @@ public class SettingsActivity extends Activity {
         widget.setOnClickListener(v -> pinWidget());
         root.addView(widget, margins(dp(42), 0, dp(7), 0));
 
-        TextView supportTitle = label("ПОДДЕРЖАТЬ ПРОЕКТ");
-        supportTitle.setPadding(dp(4), dp(9), 0, dp(5));
-        root.addView(supportTitle);
-
-        Button support = new Button(this);
-        support.setText("Разработчику на доширак  🍜");
-        support.setTextColor(0xFFE6C77E);
-        support.setTextSize(13);
-        support.setAllCaps(false);
-        support.setBackground(rounded(0xFF111720, 18, 0x556F5A31, 1));
-        support.setOnClickListener(v -> startActivity(new Intent(this, SupportActivity.class)));
-        root.addView(support, margins(dp(45), 0, dp(4), 0));
-
-        TextView supportHint = text("Любая сумма от 99 ₽ уберёт надпись о поддержке с виджета после оплаты.",
-                11, 0xFF6E7580, false);
-        supportHint.setPadding(dp(5), dp(3), dp(5), 0);
-        root.addView(supportHint);
-
         refreshDates();
         refreshPhotoStatus();
         setContentView(scroll);

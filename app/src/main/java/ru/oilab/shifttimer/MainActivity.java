@@ -154,7 +154,7 @@ public class MainActivity extends Activity {
         support.setAllCaps(false);
         support.setTypeface(null, android.graphics.Typeface.BOLD);
         support.setBackground(round(0x66121923, 18, 0x665B4B31, 1));
-        support.setOnClickListener(v -> showSupportInfo());
+        support.setOnClickListener(v -> SupportLink.open(this));
         root.addView(support, blockParams(dp(45), 0, 0));
 
         TextView feedbackTitle = text("Нашли ошибку или есть идея?", 16, 0xFFF4F1E8, true);
@@ -230,10 +230,6 @@ public class MainActivity extends Activity {
         } catch (android.content.ActivityNotFoundException error) {
             Toast.makeText(this, "Не удалось открыть ссылку MAX", Toast.LENGTH_LONG).show();
         }
-    }
-
-    private void showSupportInfo() {
-        startActivity(new Intent(this, SupportActivity.class));
     }
 
     private void pinWidget() {

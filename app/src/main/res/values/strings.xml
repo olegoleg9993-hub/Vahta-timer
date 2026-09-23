@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">Таймер вахтовика</string>
     <string name="widget_description">Обратный отсчёт до межвахты и заработок</string>
+    <string name="support_form_url" translatable="false">https://yookassa.ru/my/i/arNq-a20FfFm/l</string>
 </resources>
