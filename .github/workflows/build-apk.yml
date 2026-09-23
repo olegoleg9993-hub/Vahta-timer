@@ -45,12 +45,16 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Подготовить инструменты подписи
+        run: |
+          mkdir -p signing-tools
+          cp "$(find /usr/local /opt /home/runner -type f -name apksigner.jar -print -quit 2>/dev/null)" signing-tools/apksigner.jar
+          cp "$(find /usr/local /opt /home/runner -type f -name zipalign -print -quit 2>/dev/null)" signing-tools/zipalign
+
       - name: Выдать инструменты подписи
         uses: actions/upload-artifact@v4
         with:
           name: android-signing-tools
-          path: |
-            ${{ env.ANDROID_HOME }}/build-tools/35.0.0/lib/apksigner.jar
-            ${{ env.ANDROID_HOME }}/build-tools/35.0.0/zipalign
+          path: signing-tools/
           if-no-files-found: error
           retention-days: 30
