@@ -52,13 +52,14 @@ public class MainActivity extends Activity {
  private void reply(String id, String body, String error) {
   runOnUiThread(()->{ if(!isFinishing() && web!=null) web.evaluateJavascript("window.nativeResult("+JSONObject.quote(id)+","+(body==null?"null":JSONObject.quote(body))+","+(error==null?"null":JSONObject.quote(error))+")",null); });
  }
- private void request(String id, String url) {
+ private void request(String id, String url) { request(id,url,false); }
+ private void request(String id, String url, boolean textResponse) {
   worker.execute(()->{
    HttpURLConnection c=null;
    try {
     c=(HttpURLConnection)new URL(url).openConnection();
     c.setConnectTimeout(18000); c.setReadTimeout(25000);
-    c.setRequestProperty("User-Agent","PoletVahta/0.2 (Android personal weather prototype)");
+    c.setRequestProperty("User-Agent","PoletVahta/0.3 (Android personal weather prototype)");
     c.setRequestProperty("Accept","application/json");
     c.setInstanceFollowRedirects(false);
     int status=c.getResponseCode();
@@ -67,13 +68,25 @@ public class MainActivity extends Activity {
     try(InputStream in=c.getInputStream(); ByteArrayOutputStream out=new ByteArrayOutputStream()) {
      byte[] b=new byte[8192]; int n;
      while((n=in.read(b))!=-1) {out.write(b,0,n); if(out.size()>4000000) throw new Exception("Ответ источника слишком большой");}
-     reply(id,out.toString(StandardCharsets.UTF_8.name()),null);
+     String body=out.toString(StandardCharsets.UTF_8.name());
+     reply(id,textResponse?new JSONObject().put("text",body).toString():body,null);
     }
    } catch(Exception e) {reply(id,null,e.getMessage()==null?"Не удалось загрузить погоду":e.getMessage());}
    finally {if(c!=null)c.disconnect();}
   });
  }
  public class Bridge {
+  @JavascriptInterface public void cloudRun(String id) {
+   request(id,"https://thredds.ucar.edu/thredds/catalog/grib/NCEP/GFS/Global_0p25deg/latest.xml",true);
+  }
+  @JavascriptInterface public void cloud(String id,String run,String lat,String lon,String start,String end) {
+   try {
+    double a=Double.parseDouble(lat),b=Double.parseDouble(lon);
+    if(!Double.isFinite(a)||!Double.isFinite(b)||Math.abs(a)>90||Math.abs(b)>180||run==null||!run.matches("[0-9]{8}_[0-9]{4}")||start==null||end==null||!start.matches("[0-9T:Z-]{20}")||!end.matches("[0-9T:Z-]{20}"))throw new Exception();
+    request(id,"https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/GFS/Global_0p25deg/GFS_Global_0p25deg_"+run+".grib2?var=Geopotential_height_cloud_ceiling&var=Geopotential_height_surface&latitude="+Uri.encode(lat)+"&longitude="+Uri.encode(lon)+"&time_start="+Uri.encode(start)+"&time_end="+Uri.encode(end)+"&accept=csv",true);
+   }catch(Exception e){reply(id,null,"Проверьте параметры запроса высоты облаков");}
+  }
+
   @JavascriptInterface public void close() { runOnUiThread(()->finish()); }
   @JavascriptInterface public String load() {return getPreferences(0).getString("state","{}");}
   @JavascriptInterface public void save(String value) { if(value!=null && value.length()<2000000) getPreferences(0).edit().putString("state",value).apply(); }

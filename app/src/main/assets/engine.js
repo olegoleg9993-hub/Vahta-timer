@@ -116,6 +116,17 @@ function coverage(results){
  list.push({name:'Высота облаков / вертикальная видимость',status:cloudCount===results.length?'есть':cloudCount?'частично':'нет'},{name:'Обледенение на маршруте',status:'нет'},{name:'Турбулентность',status:'нет'});
  return {list,available:list.filter(x=>x.status==='есть').length,total:list.length,partial:cloudCount>0&&cloudCount<results.length};
 }
+// NCSS CSV contains geopotential heights relative to sea level (GFS UPP CLDZ).
+// Subtract model terrain at the same grid cell to approximate height above ground.
+function parseCloudCsv(csv){
+ const lines=String(csv).trim().split(/\r?\n/),header=lines.shift()?.split(',')||[],index=key=>header.findIndex(h=>h.startsWith(key+'['));
+ const ci=index('Geopotential_height_cloud_ceiling'),si=index('Geopotential_height_surface'),li=index('latitude'),oi=index('longitude');
+ if(ci<0||si<0||li<0||oi<0)throw Error('Источник высоты облаков вернул другой формат.');
+ const rows=[];for(const line of lines){const f=line.split(','),ms=Date.parse(f[0]),value=i=>f[i]?.trim()?Number(f[i]):NaN,c=value(ci),terrain=value(si),lat=value(li),lon=value(oi);if(!Number.isFinite(ms)||!valid(lat)||!valid(lon))continue;const height=valid(c)&&valid(terrain)&&c>=-500&&c<19000&&Math.abs(terrain)<10000?Math.max(0,c-terrain):null;rows.push({ms,value:height,lat,lon:lon>180?lon-360:lon});}
+ if(!rows.length)throw Error('В источнике нет часов прогноза облаков.');return rows.sort((a,b)=>a.ms-b.ms);
+}
+function cloudAt(rows,ms){if(!Array.isArray(rows)||!rows.length||ms<rows[0].ms||ms>rows[rows.length-1].ms)return null;const exact=rows.find(r=>r.ms===ms);if(exact)return valid(exact.value)?{known:true,value:exact.value,clear:false,source:'GFS',approximate:true}:null;const hi=rows.findIndex(r=>r.ms>ms);if(hi<1||rows[hi].ms-rows[hi-1].ms>3*3600000||!valid(rows[hi].value)||!valid(rows[hi-1].value))return null;return {known:true,value:Math.min(rows[hi].value,rows[hi-1].value),clear:false,source:'GFS',approximate:true};}
+function withCloud(r,cloud,t){if(!cloud)return r;const out={...r,g:{...r.g},reasons:r.reasons.slice()};if(r.cloud?.known){out.cloud={...cloud,value:r.cloud.clear?cloud.value:Math.min(r.cloud.value,cloud.value),source:'TAF + GFS'};}else out.cloud={...cloud};out.g.cloud=grade(out.cloud.value,t.cloudRed,t.cloudYellow,true);if(out.g.cloud>0)out.reasons.push('Низкие облака по '+out.cloud.source);out.reasons=out.reasons.map(x=>x==='Много облаков нижнего яруса; их высота неизвестна'?'Много облаков нижнего яруса':x);out.level=Math.max(out.level===3?0:out.level,out.g.cloud);if(out.missing&&out.level<2)out.level=3;return out;}
 function compass(deg){if(!valid(deg))return '—';const dirs=['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'];return dirs[Math.round(deg/45)%8]+' '+Math.round(deg)+'°';}
-const api={defaults,valid,assess,routePoints,combine,weatherName,sampleModel,tafAt,ceilingOf,augment,weatherIndex,coverage,compass,severity};root.Engine=api;if(typeof module!=='undefined')module.exports=api;
+const api={defaults,valid,assess,routePoints,combine,weatherName,sampleModel,tafAt,ceilingOf,augment,weatherIndex,coverage,compass,severity,parseCloudCsv,cloudAt,withCloud};root.Engine=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
