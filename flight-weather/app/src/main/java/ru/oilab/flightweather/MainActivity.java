@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
    try {
     c=(HttpURLConnection)new URL(url).openConnection();
     c.setConnectTimeout(18000); c.setReadTimeout(25000);
-    c.setRequestProperty("User-Agent","PoletVahta/0.14 (Android personal weather prototype)");
+    c.setRequestProperty("User-Agent","PoletVahta/0.15 (Android personal weather prototype)");
     c.setRequestProperty("Accept","application/json");
     c.setInstanceFollowRedirects(false);
     int status=c.getResponseCode();
