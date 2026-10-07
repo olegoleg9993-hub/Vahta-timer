@@ -3,7 +3,7 @@
 const defaults={visRed:1000,visYellow:3000,windRed:20,windYellow:12,gustRed:25,gustYellow:18,rainRed:3,rainYellow:1,cloudRed:150,cloudYellow:300};
 function valid(n){return typeof n==='number'&&Number.isFinite(n);}
 const fieldRanges={visibility:[0,200000],wind:[0,200],gust:[0,200],rain:[0,3600],low:[0,100],temp:[-100,70],direction:[0,360],day:[0,1]};
-const codes=[0,1,2,3,45,48,51,53,55,56,57,61,63,65,66,67,71,73,75,77,80,81,82,85,86,95,96,99];
+const codes=[0,1,2,3,45,48,51,53,55,56,57,61,63,65,66,67,68,69,71,73,75,77,80,81,82,85,86,95,96,99];
 function fieldValid(k,v){if(!valid(v))return false;if(k==='code')return codes.includes(v);if(k==='day')return v===0||v===1;const range=fieldRanges[k];return !range||v>=range[0]&&v<=range[1];}
 function sanitize(x){return Object.fromEntries(Object.entries(x).map(([k,v])=>[k,fieldValid(k,v)?v:null]));}
 function visibilityMeters(v){if(valid(v))return v>=0&&v<=125?v*1609.344:null;if(typeof v!=='string')return null;const m=v.trim().match(/^(?:P)?(?:(\d+(?:\.\d+)?)|(?:(\d+)\s+)?(\d+)\/(\d+))(?:\+)?$/);if(!m)return null;const n=m[1]!==undefined?Number(m[1]):Number(m[2]||0)+Number(m[3])/Number(m[4]);return valid(n)&&n>=0&&n<=125?n*1609.344:null;}
@@ -28,7 +28,7 @@ function assess(h,i,t){t=Object.assign({},defaults,t);const x=sanitize({visibili
 }
 function routePoints(a,b){const rad=Math.PI/180;const unit=p=>[Math.cos(p.lat*rad)*Math.cos(p.lon*rad),Math.cos(p.lat*rad)*Math.sin(p.lon*rad),Math.sin(p.lat*rad)];const u=unit(a),v=unit(b);const angle=Math.acos(Math.max(-1,Math.min(1,u.reduce((s,x,i)=>s+x*v[i],0))));if(angle>Math.PI-.01)throw Error('Выберите более короткий маршрут');const points=[];for(let i=0;i<5;i++){let t=i/4,xyz;if(angle<1e-7)xyz=u;else{let p=Math.sin((1-t)*angle)/Math.sin(angle),q=Math.sin(t*angle)/Math.sin(angle);xyz=u.map((x,j)=>p*x+q*v[j]);}points.push({lat:Math.atan2(xyz[2],Math.hypot(xyz[0],xyz[1]))/rad,lon:Math.atan2(xyz[1],xyz[0])/rad});}return {points,distance:angle*6371};}
 function combine(results){const severe=results.some(r=>r.level===2),missing=results.some(r=>r.missing);return {level:severe?2:missing?3:Math.max(...results.map(r=>r.level)),missing};}
-function weatherName(c){if(c===null)return 'Нет данных';if(c===0)return 'Ясно';if(c<=3)return 'Облачно';if([45,48].includes(c))return 'Туман';if([56,57,66,67].includes(c))return 'Переохлаждённые осадки';if(c>=95)return 'Гроза';if([71,73,75,77,85,86].includes(c))return 'Снег';if(c>=51&&c<=82)return 'Дождь / морось';return 'Осадки';}
+function weatherName(c){if(c===null)return 'Нет данных';if(c===0)return 'Ясно';if(c<=3)return 'Облачно';if([45,48].includes(c))return 'Туман';if([56,57,66,67].includes(c))return 'Переохлаждённые осадки';if(c>=95)return 'Гроза';if([68,69].includes(c))return 'Дождь со снегом';if([71,73,75,77,85,86].includes(c))return 'Снег';if(c>=51&&c<=82)return 'Дождь / морось';return 'Осадки';}
 
 function sampleModel(data,ms,t){
  const expectedUnits={temperature_2m:'°C',visibility:'m',wind_speed_10m:'m/s',wind_gusts_10m:'m/s',wind_direction_10m:'°',cloud_cover_low:'%',precipitation:'mm',weather_code:'wmo code',is_day:''};

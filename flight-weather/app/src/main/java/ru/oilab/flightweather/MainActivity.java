@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
    try {
     c=(HttpURLConnection)new URL(url).openConnection();
     c.setConnectTimeout(18000); c.setReadTimeout(25000);
-    c.setRequestProperty("User-Agent","PoletVahta/0.17 (Android personal weather prototype)");
+    c.setRequestProperty("User-Agent","PoletVahta/0.18 (https://github.com/olegoleg9993-hub/Vahta-timer)");
     c.setRequestProperty("Accept",textResponse?"text/csv,application/xml,text/xml,*/*":"application/json");
     c.setInstanceFollowRedirects(false);
     int status=c.getResponseCode();
@@ -112,6 +112,9 @@ public class MainActivity extends Activity {
     }
     request(id,"https://api.open-meteo.com/v1/forecast?latitude="+Uri.encode(lats)+"&longitude="+Uri.encode(lons)+"&hourly=temperature_2m,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover_low,weather_code,precipitation,is_day&wind_speed_unit=ms&timezone=GMT&forecast_days=4");
    }catch(Exception e){reply(id,null,"Проверьте координаты маршрута");}
+  }
+  @JavascriptInterface public void secondaryWeather(String id,String lat,String lon) {
+   try {double a=Double.parseDouble(lat),b=Double.parseDouble(lon);if(!Double.isFinite(a)||!Double.isFinite(b)||Math.abs(a)>90||Math.abs(b)>180)throw new Exception();request(id,"https://api.met.no/weatherapi/locationforecast/2.0/complete?lat="+Uri.encode(lat)+"&lon="+Uri.encode(lon));}catch(Exception e){reply(id,null,"Проверьте координаты дополнительной погоды");}
   }
   @JavascriptInterface public void search(String id,String query) {
    if(query==null || query.trim().length()<2 || query.length()>100) {reply(id,null,"Введите название населённого пункта");return;}

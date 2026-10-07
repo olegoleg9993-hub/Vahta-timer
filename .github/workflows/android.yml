@@ -23,6 +23,6 @@ jobs:
         run: gradle -p flight-weather --no-daemon :app:assembleDebug :app:lintDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: Polet-Vahta-0.17.0
+          name: Polet-Vahta-0.18.0
           path: flight-weather/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
