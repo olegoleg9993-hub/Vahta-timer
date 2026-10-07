@@ -127,11 +127,24 @@ function parseCloudCsv(csv){
  const lines=String(csv).trim().split(/\r?\n/),header=lines.shift()?.split(',')||[],index=key=>header.findIndex(h=>h.startsWith(key+'['));
  const ci=index('Geopotential_height_cloud_ceiling'),si=index('Geopotential_height_surface'),li=index('latitude'),oi=index('longitude');
  if(ci<0||si<0||li<0||oi<0)throw Error('Источник высоты облаков вернул другой формат.');
- const rows=[];for(const line of lines){const f=line.split(','),ms=Date.parse(f[0]),value=i=>f[i]?.trim()?Number(f[i]):NaN,c=value(ci),terrain=value(si),lat=value(li),lon=value(oi);if(!Number.isFinite(ms)||!valid(lat)||!valid(lon))continue;const height=valid(c)&&valid(terrain)&&c>=-500&&c<19000&&Math.abs(terrain)<10000?Math.max(0,c-terrain):null;const reason=height!==null?null:!valid(c)?'missingHeight':c<-500||c>=19000?'rejectedHeight':'invalidTerrain';rows.push({ms,value:height,reason,rawHeight:valid(c)?c:null,lat,lon:lon>180?lon-360:lon});}
+ const rows=[];for(const line of lines){const f=line.split(','),ms=Date.parse(f[0]),value=i=>f[i]?.trim()?Number(f[i]):NaN,c=value(ci),terrain=value(si),lat=value(li),lon=value(oi);if(!Number.isFinite(ms)||!valid(lat)||!valid(lon))continue;// NOAA UPP AVIATION.f CALCEILING: 20000 is the no-ceiling sentinel.
+ const clear=valid(c)&&Math.abs(c-20000)<=1;const height=!clear&&valid(c)&&valid(terrain)&&c>=-500&&c<19000&&Math.abs(terrain)<10000?Math.max(0,c-terrain):null;const reason=clear||height!==null?null:!valid(c)?'missingHeight':c<-500||c>=19000?'ambiguousHeight':'invalidTerrain';rows.push({ms,value:height,clear,reason,rawHeight:valid(c)?c:null,lat,lon:lon>180?lon-360:lon});}
  if(!rows.length)throw Error('В источнике нет часов прогноза облаков.');return rows.sort((a,b)=>a.ms-b.ms);
 }
-function cloudAt(rows,ms){if(!Array.isArray(rows)||!rows.length||ms<rows[0].ms||ms>rows[rows.length-1].ms)return null;const exact=rows.find(r=>r.ms===ms);if(exact)return valid(exact.value)?{known:true,value:exact.value,clear:false,source:'GFS',approximate:true}:null;const hi=rows.findIndex(r=>r.ms>ms);if(hi<1||rows[hi].ms-rows[hi-1].ms>3*3600000||!valid(rows[hi].value)||!valid(rows[hi-1].value))return null;return {known:true,value:Math.min(rows[hi].value,rows[hi-1].value),clear:false,source:'GFS',approximate:true};}
-function withCloud(r,cloud,t){if(!cloud)return r;const out={...r,g:{...r.g},reasons:r.reasons.slice()};if(r.cloud?.known){out.cloud={...cloud,value:r.cloud.clear?cloud.value:Math.min(r.cloud.value,cloud.value),source:'TAF + GFS'};}else out.cloud={...cloud};out.g.cloud=grade(out.cloud.value,t.cloudRed,t.cloudYellow,true);if(out.g.cloud>0)out.reasons.push('Низкие облака по '+out.cloud.source);out.reasons=out.reasons.map(x=>x==='Значительная облачность нижнего яруса'?'Много облаков нижнего яруса':x);out.level=Math.max(out.level===3?0:out.level,out.g.cloud);if(out.missing&&out.level<2)out.level=3;return out;}
+function cloudAt(rows,ms){
+ if(!Array.isArray(rows)||!rows.length||ms<rows[0].ms||ms>rows[rows.length-1].ms)return null;
+ const known=r=>r?.clear===true||valid(r?.value),result=r=>({known:true,value:r.clear?null:r.value,clear:!!r.clear,source:'GFS',approximate:true});
+ const exact=rows.find(r=>r.ms===ms);if(exact)return known(exact)?result(exact):null;
+ const hi=rows.findIndex(r=>r.ms>ms);if(hi<1||rows[hi].ms-rows[hi-1].ms>3*3600000||!known(rows[hi])||!known(rows[hi-1]))return null;
+ const a=rows[hi-1],b=rows[hi];if(a.clear&&b.clear)return result(a);
+ if(a.clear)return result(b);if(b.clear)return result(a);return result({value:Math.min(a.value,b.value),clear:false});
+}
+function withCloud(r,cloud,t){
+ if(!cloud)return r;const out={...r,g:{...r.g},reasons:r.reasons.slice()};
+ if(r.cloud?.known){const values=[r.cloud,cloud].filter(c=>!c.clear&&valid(c.value)).map(c=>c.value);out.cloud={...cloud,value:values.length?Math.min(...values):null,clear:!values.length,source:'TAF + GFS'};}else out.cloud={...cloud};
+ out.g.cloud=out.cloud.clear?0:grade(out.cloud.value,t.cloudRed,t.cloudYellow,true);
+ if(out.g.cloud>0)out.reasons.push('Низкие облака по '+out.cloud.source);out.reasons=out.reasons.map(x=>x==='Значительная облачность нижнего яруса'?'Много облаков нижнего яруса':x);out.level=Math.max(out.level===3?0:out.level,out.g.cloud);if(out.missing&&out.level<2)out.level=3;return out;
+}
 function compass(deg){if(!valid(deg))return '—';const dirs=['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'];return dirs[Math.round(deg/45)%8]+' '+Math.round(deg)+'°';}
 const api={defaults,valid,assess,routePoints,combine,weatherName,sampleModel,tafAt,ceilingOf,augment,weatherIndex,indexDetails,coverage,compass,severity,parseCloudCsv,cloudAt,withCloud};root.Engine=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
