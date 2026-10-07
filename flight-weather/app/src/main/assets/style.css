@@ -11,3 +11,5 @@
 .factor-impacts{margin:14px 0}.factor-impact{border:1px solid currentColor;border-left:4px solid currentColor;border-radius:12px;padding:10px 12px;margin:8px 0;background:#0d1e2b}.factor-impact b,.factor-impact span{display:block;font-size:12px;line-height:1.5}.factor-impact span{margin-top:4px}.factor-impacts>.caption{display:block}
 
 .cloud-hour.red{color:var(--red);font-weight:700}.cloud-hour.yellow{color:var(--yellow);font-weight:650}.cloud-hour.green{color:var(--green)}.cloud-hour.gray{color:var(--muted)}
+
+.flight-time-note{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#102331;color:var(--muted)}
