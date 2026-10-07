@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict');const E=require('../app/src/main/assets/engine.js'),C=require('../app/src/main/assets/catalog.js');
+const h={time:['2026-10-07T06:00','2026-10-07T07:00'],visibility:[10000,500],wind_speed_10m:[3,4],wind_gusts_10m:[4,6],cloud_cover_low:[0,0],precipitation:[0,0],temperature_2m:[10,12],weather_code:[0,0],is_day:[1,1],wind_direction_10m:[350,10]};
+const sampled=E.sampleModel({hourly:h},Date.parse('2026-10-07T06:30Z'),E.defaults);assert.equal(sampled.x.visibility,500);assert.equal(sampled.x.wind,4);assert.equal(sampled.x.direction,0);assert.equal(sampled.x.temp,11);assert.equal(sampled.level,2);
+const before=E.sampleModel({hourly:h},Date.parse('2026-10-07T05:30Z'),E.defaults);assert.equal(before.level,3);
+const clean=E.assess({...h,visibility:[10000]},0);assert.equal(E.weatherIndex([clean],E.defaults),100);assert.equal(E.weatherIndex([sampled],E.defaults),0);assert.equal(E.weatherIndex([before],E.defaults),null);
+assert.equal(E.weatherIndex([E.assess({...h,visibility:[10000],wind_speed_10m:[12]},0)],E.defaults),60);
+const t0=Date.parse('2026-10-07T06:00Z')/1000;
+const taf={icaoId:'USRR',validTimeFrom:t0,validTimeTo:t0+6*3600,fcsts:[{timeFrom:t0,timeTo:t0+3600,fcstChange:null,visib:'6+',clouds:[{cover:'OVC',base:1000}]},{timeFrom:t0,timeTo:t0+1800,fcstChange:'TEMPO',visib:0.2,clouds:[{cover:'OVC',base:200}]},{timeFrom:t0+3600,timeTo:t0+6*3600,timeBec:t0+2*3600,fcstChange:'BECMG',visib:'6+',clouds:[{cover:'OVC',base:3000}]}]};
+const temp=E.tafAt(taf,(t0+600)*1000);assert.equal(temp.temporary,true);assert.equal(temp.variants.length,2);
+const transition=E.tafAt(taf,(t0+5400)*1000);assert.equal(transition.transition,true);assert.equal(transition.variants.length,2);
+const settled=E.tafAt(taf,(t0+3*3600)*1000);assert.equal(settled.transition,false);assert.equal(settled.variants.length,1);
+assert.equal(E.tafAt(taf,(t0+7*3600)*1000),null);assert.equal(E.tafAt(taf,(t0-1)*1000),null);
+const augmented=E.augment(clean,taf,(t0+600)*1000,E.defaults,C.get('mi8'));assert.equal(augmented.level,2);assert(Math.abs(augmented.cloud.value-60.96)<.001);assert.equal(E.weatherIndex([augmented],E.defaults),0);
+const trans=E.augment(clean,taf,(t0+5400)*1000,E.defaults,C.get('mi8'));assert(Math.abs(trans.cloud.value-304.8)<.001);
+assert.equal(E.ceilingOf({clouds:[{cover:'SCT',base:200}]}).clear,true);assert.equal(E.ceilingOf({clouds:[]}).known,false);assert.equal(E.ceilingOf({vertVis:100}).value,30.48);
+const hot=E.augment({...clean,x:{...clean.x,temp:55}},null,0,E.defaults,C.get('mi8mtv1'));assert.equal(hot.temperatureOutside,true);assert.equal(E.weatherIndex([hot],E.defaults),0);
+const cover=E.coverage([augmented,clean]);assert.equal(cover.partial,true);assert.equal(cover.total,12);assert.equal(C.aircraft.length,19);assert.equal(E.compass(270),'З 270°');
+console.log('Прогноз: соседние часы, индекс, направление, TAF TEMPO/BECMG, срок действия, футы/метры, температура, полнота и каталог — пройдены');

@@ -58,10 +58,11 @@ public class MainActivity extends Activity {
    try {
     c=(HttpURLConnection)new URL(url).openConnection();
     c.setConnectTimeout(18000); c.setReadTimeout(25000);
-    c.setRequestProperty("User-Agent","PoletVahta/0.1 (Android personal weather prototype)");
+    c.setRequestProperty("User-Agent","PoletVahta/0.2 (Android personal weather prototype)");
     c.setRequestProperty("Accept","application/json");
     c.setInstanceFollowRedirects(false);
     int status=c.getResponseCode();
+    if(status==204){reply(id,"[]",null);return;}
     if(status!=200) throw new Exception(status==429?"Источник временно ограничил запросы. Повторите позже.":"Источник погоды ответил с ошибкой "+status);
     try(InputStream in=c.getInputStream(); ByteArrayOutputStream out=new ByteArrayOutputStream()) {
      byte[] b=new byte[8192]; int n;
@@ -84,12 +85,16 @@ public class MainActivity extends Activity {
      double lat=Double.parseDouble(a[i]),lon=Double.parseDouble(b[i]);
      if(!Double.isFinite(lat)||!Double.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180) throw new Exception();
     }
-    request(id,"https://api.open-meteo.com/v1/forecast?latitude="+Uri.encode(lats)+"&longitude="+Uri.encode(lons)+"&hourly=temperature_2m,visibility,wind_speed_10m,wind_gusts_10m,cloud_cover_low,weather_code,precipitation,is_day&wind_speed_unit=ms&timezone=GMT&forecast_days=4");
+    request(id,"https://api.open-meteo.com/v1/forecast?latitude="+Uri.encode(lats)+"&longitude="+Uri.encode(lons)+"&hourly=temperature_2m,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover_low,weather_code,precipitation,is_day&wind_speed_unit=ms&timezone=GMT&forecast_days=4");
    }catch(Exception e){reply(id,null,"Проверьте координаты маршрута");}
   }
   @JavascriptInterface public void search(String id,String query) {
    if(query==null || query.trim().length()<2 || query.length()>100) {reply(id,null,"Введите название населённого пункта");return;}
    request(id,"https://geocoding-api.open-meteo.com/v1/search?name="+Uri.encode(query.trim())+"&count=10&language=ru&format=json");
+  }
+  @JavascriptInterface public void taf(String id,String codes) {
+   if(codes==null || !codes.matches("[A-Z]{4}(,[A-Z]{4})?")) {reply(id,null,"Укажите корректные коды ICAO");return;}
+   request(id,"https://aviationweather.gov/api/data/taf?ids="+Uri.encode(codes)+"&format=json");
   }
   @JavascriptInterface public void metar(String id,String codes) {
    if(codes==null || !codes.matches("[A-Z]{4}(,[A-Z]{4})?")) {reply(id,null,"Код ICAO должен состоять из четырёх латинских букв");return;}
@@ -97,5 +102,7 @@ public class MainActivity extends Activity {
   }
  }
  @Override public void onBackPressed() {web.evaluateJavascript("window.handleBack && window.handleBack()",null);}
+ @Override protected void onPause() { if(web!=null){web.onPause();web.pauseTimers();}super.onPause(); }
+ @Override protected void onResume() { super.onResume();if(web!=null){web.onResume();web.resumeTimers();web.evaluateJavascript("window.onAppResume && window.onAppResume()",null);} }
  @Override protected void onDestroy() {worker.shutdownNow(); if(web!=null){web.removeJavascriptInterface("Native");web.destroy();web=null;}super.onDestroy();}
 }
