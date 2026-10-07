@@ -2,7 +2,7 @@
 'use strict';
 const defaults={visRed:1000,visYellow:3000,windRed:20,windYellow:12,gustRed:25,gustYellow:18,rainRed:3,rainYellow:1,cloudRed:150,cloudYellow:300};
 function valid(n){return typeof n==='number'&&Number.isFinite(n);}
-function grade(v,red,yellow,reverse){if(!valid(v))return 3;return reverse?(v<red?2:v<yellow?1:0):(v>=red?2:v>=yellow?1:0);}
+function grade(v,red,yellow,reverse){if(!valid(v))return 3;return reverse?(v<=red?2:v<=yellow?1:0):(v>=red?2:v>=yellow?1:0);}
 function at(h,key,i){const v=h&&h[key]&&h[key][i];return valid(v)?v:null;}
 function assess(h,i,t){t=Object.assign({},defaults,t);const x={visibility:at(h,'visibility',i),wind:at(h,'wind_speed_10m',i),gust:at(h,'wind_gusts_10m',i),low:at(h,'cloud_cover_low',i),rain:at(h,'precipitation',i),temp:at(h,'temperature_2m',i),code:at(h,'weather_code',i),direction:at(h,'wind_direction_10m',i),day:at(h,'is_day',i)};
  const g={visibility:grade(x.visibility,t.visRed,t.visYellow,true),wind:grade(x.wind,t.windRed,t.windYellow),gust:grade(x.gust,t.gustRed,t.gustYellow),rain:grade(x.rain,t.rainRed,t.rainYellow),low:valid(x.low)?(x.low>=80?1:0):3};
@@ -28,7 +28,7 @@ function sampleModel(data,ms,t){
  const h=data?.hourly||{},times=h.time||[],stamp=times.map(s=>Date.parse(s+'Z'));
  const lower=stamp.findIndex(x=>x===ms);if(lower>=0)return assess(h,lower,t);
  let hi=stamp.findIndex(x=>x>ms);if(hi<1)return assess({},-1,t);
- const a=hi-1,b=hi,out={};
+ const a=hi-1,b=hi,out={};if(stamp[b]-stamp[a]>3600000)return assess({},-1,t);
  for(const key of ['visibility','wind_speed_10m','wind_gusts_10m','cloud_cover_low','precipitation','temperature_2m','weather_code','is_day','wind_direction_10m']){
   const va=at(h,key,a),vb=at(h,key,b);let value=null;
   if(va!==null&&vb!==null){
@@ -44,7 +44,7 @@ function sampleModel(data,ms,t){
  return assess(out,0,t);
 }
 function severity(v,red,yellow,reverse=false){
- if(!valid(v))return null;
+ if(!valid(v)||v<0)return null;
  if(reverse){if(v<=red)return 1;if(v<yellow)return .4+.6*(yellow-v)/(yellow-red);return Math.max(0,.4*(2*yellow-v)/yellow);}
  if(v>=red)return 1;if(v>yellow)return .4+.6*(v-yellow)/(red-yellow);return Math.max(0,.4*v/yellow);
 }
@@ -53,7 +53,7 @@ function tafAt(taf,ms){
  const sec=ms/1000;if(!taf||sec<taf.validTimeFrom||sec>=taf.validTimeTo)return null;
  const fcsts=Array.isArray(taf.fcsts)?taf.fcsts:[],normal=fcsts.filter(g=>!g.fcstChange||['FM','BECMG'].includes(g.fcstChange)).sort((a,b)=>a.timeFrom-b.timeFrom);
  let previous={},conditions=null,variants=[],transition=false;
- for(const g of normal){if(g.timeFrom>sec)break;const next=mergeForecast(previous,g);
+ for(const g of normal){if(g.timeFrom>sec)break;const next=mergeForecast(g.fcstChange==='FM'?{}:previous,g);
   if(g.fcstChange==='BECMG'&&valid(g.timeBec)&&sec<g.timeBec){variants=[previous,next];transition=true;conditions=next;break;}
   previous=next;conditions=next;
  }
@@ -96,21 +96,22 @@ function augment(result,taf,ms,t,aircraft){
 }
 function indexDetails(results,t){
  t={...defaults,...t};const required=[['visibility','Видимость'],['wind','Ветер'],['gust','Порывы'],['rain','Осадки'],['code','Явления погоды'],['temp','Температура'],['direction','Направление ветра'],['day','День / ночь'],['low','Облачность нижнего яруса']];
+ results=results.map(r=>({...r,x:Object.fromEntries(Object.entries(r.x).map(([k,v])=>[k,valid(v)&&(['visibility','wind','gust','rain'].includes(k)&&v<0||k==='low'&&(v<0||v>100)||k==='direction'&&(v<0||v>360)||k==='day'&&![0,1].includes(v)||k==='temp'&&(v< -100||v>70)||k==='code'&&![0,1,2,3,45,48,51,53,55,56,57,61,63,65,66,67,71,73,75,77,80,81,82,85,86,95,96,99].includes(v))?null:v]))}));
  const missing=[];required.forEach(([key,name])=>{const points=results.map((r,i)=>valid(r.x[key])?null:i).filter(i=>i!==null);if(points.length)missing.push({name,points});});
- const points=results.map((r,i)=>r.cloud?.known&&(r.cloud.clear||valid(r.cloud.value))?null:i).filter(i=>i!==null);if(points.length)missing.push({name:'Высота облаков / облачный потолок',points});
+ const points=results.map((r,i)=>r.cloud?.known&&(r.cloud.clear||valid(r.cloud.value)&&r.cloud.value>=0)?null:i).filter(i=>i!==null);if(points.length)missing.push({name:'Высота облаков / облачный потолок',points});
  if(!results.length)missing.push({name:'Погодный прогноз',points:[]});
- if(missing.length)return {score:null,missing,points:[]};
+ 
  const breakdown=results.map(r=>{
+  const wind=severity(r.x.wind,t.windRed,t.windYellow),gust=severity(r.x.gust,t.gustRed,t.gustYellow);
   const factors=[{name:'Видимость',value:r.x.visibility,unit:'м',penalty:severity(r.x.visibility,t.visRed,t.visYellow,true)},
-   {name:'Ветер',value:r.x.wind,unit:'м/с',penalty:severity(r.x.wind,t.windRed,t.windYellow)},
-   {name:'Порывы',value:r.x.gust,unit:'м/с',penalty:severity(r.x.gust,t.gustRed,t.gustYellow)},
+   {name:'Ветер / порывы',value:r.x.wind,gust:r.x.gust,unit:'м/с',penalty:wind===null?gust:gust===null?wind:Math.max(wind,gust)},
    {name:'Осадки',value:r.x.rain,unit:'мм/ч',penalty:severity(r.x.rain,t.rainRed,t.rainYellow)},
-   {name:'Облачный потолок',value:r.cloud.clear?null:r.cloud.value,unit:'м',clear:r.cloud.clear,source:r.cloud.source,penalty:r.cloud.clear?0:severity(r.cloud.value,t.cloudRed,t.cloudYellow,true)}];
+   {name:'Облачный потолок',value:r.cloud?.clear?null:r.cloud?.value,unit:'м',clear:r.cloud?.clear,source:r.cloud?.source,penalty:r.cloud?.known?(r.cloud.clear?0:severity(r.cloud.value,t.cloudRed,t.cloudYellow,true)):null}].filter(f=>f.penalty!==null);
   const adverse=[95,96,99,56,57,66,67].includes(r.x.code)||r.temperatureOutside||(r.aviation?.variants||[]).some(g=>/TS|FZRA|FZDZ/.test(g.wxString||''));
   if(adverse)factors.push({name:r.temperatureOutside?'Температура вне справочного диапазона':'Гроза / переохлаждённые осадки',penalty:1});
   // Product is a chosen weather scoring rule, not multiplication of event probabilities.
-  const raw=100*factors.reduce((acc,f)=>acc*(1-f.penalty),1);return {raw,score:Math.round(raw),factors};
- });return {score:Math.round(Math.min(...breakdown.map(x=>x.raw))),missing:[],points:breakdown};
+  const raw=100*factors.reduce((acc,f)=>acc*(1-f.penalty),1);return {raw,score:factors.length?Math.round(raw):null,factors};
+ });const known=breakdown.reduce((sum,p)=>sum+p.factors.length,0);return {score:known?Math.round(Math.min(...breakdown.map(x=>x.raw))):null,partial:missing.length>0,missing,known,points:breakdown};
 }
 function weatherIndex(results,t){return indexDetails(results,t).score;}
 function coverage(results){

@@ -2,8 +2,8 @@ const assert=require('node:assert/strict');const E=require('../app/src/main/asse
 const h={visibility:[10000],wind_speed_10m:[3],wind_gusts_10m:[5],cloud_cover_low:[0],precipitation:[0],temperature_2m:[5],weather_code:[0],is_day:[1]};
 assert.equal(E.assess(h,0).level,0);
 assert.equal(E.assess({...h,visibility:[500]},0).level,2);
-assert.equal(E.assess({...h,visibility:[1000]},0).level,1);
-assert.equal(E.assess({...h,visibility:[3000]},0).level,0);
+assert.equal(E.assess({...h,visibility:[1000]},0).level,2);
+assert.equal(E.assess({...h,visibility:[3000]},0).level,1);
 assert.equal(E.assess({...h,wind_gusts_10m:[25]},0).level,2);
 assert.equal(E.assess({...h,weather_code:[95]},0).level,2);
 assert.equal(E.assess({...h,weather_code:[66]},0).level,2);

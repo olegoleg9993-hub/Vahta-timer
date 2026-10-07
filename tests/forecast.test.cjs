@@ -2,8 +2,8 @@ const assert=require('node:assert/strict');const E=require('../app/src/main/asse
 const h={time:['2026-10-07T06:00','2026-10-07T07:00'],visibility:[10000,500],wind_speed_10m:[3,4],wind_gusts_10m:[4,6],cloud_cover_low:[0,0],precipitation:[0,0],temperature_2m:[10,12],weather_code:[0,0],is_day:[1,1],wind_direction_10m:[350,10]};
 const sampled=E.sampleModel({hourly:h},Date.parse('2026-10-07T06:30Z'),E.defaults);assert.equal(sampled.x.visibility,500);assert.equal(sampled.x.wind,4);assert.equal(sampled.x.direction,0);assert.equal(sampled.x.temp,11);assert.equal(sampled.level,2);
 const before=E.sampleModel({hourly:h},Date.parse('2026-10-07T05:30Z'),E.defaults);assert.equal(before.level,3);
-const clean={...E.assess({...h,visibility:[10000]},0),cloud:{known:true,value:1000,clear:false}};assert.equal(E.weatherIndex([clean],E.defaults),82);assert.equal(E.weatherIndex([{...sampled,cloud:clean.cloud}],E.defaults),0);assert.equal(E.weatherIndex([before],E.defaults),null);
-assert.equal(E.weatherIndex([{...E.assess({...h,visibility:[10000],wind_speed_10m:[12]},0),cloud:clean.cloud}],E.defaults),55);
+const clean={...E.assess({...h,visibility:[10000]},0),cloud:{known:true,value:1000,clear:false}};assert.equal(E.weatherIndex([clean],E.defaults),90);assert.equal(E.weatherIndex([{...sampled,cloud:clean.cloud}],E.defaults),0);assert.equal(E.weatherIndex([before],E.defaults),null);
+assert.equal(E.weatherIndex([{...E.assess({...h,visibility:[10000],wind_speed_10m:[12]},0),cloud:clean.cloud}],E.defaults),60);
 const t0=Date.parse('2026-10-07T06:00Z')/1000;
 const taf={icaoId:'USRR',validTimeFrom:t0,validTimeTo:t0+6*3600,fcsts:[{timeFrom:t0,timeTo:t0+3600,fcstChange:null,visib:'6+',clouds:[{cover:'OVC',base:1000}]},{timeFrom:t0,timeTo:t0+1800,fcstChange:'TEMPO',visib:0.2,clouds:[{cover:'OVC',base:200}]},{timeFrom:t0+3600,timeTo:t0+6*3600,timeBec:t0+2*3600,fcstChange:'BECMG',visib:'6+',clouds:[{cover:'OVC',base:3000}]}]};
 const temp=E.tafAt(taf,(t0+600)*1000);assert.equal(temp.temporary,true);assert.equal(temp.variants.length,2);
