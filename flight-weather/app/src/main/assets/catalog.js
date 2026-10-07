@@ -1,0 +1,25 @@
+(function(root){
+const aircraft=[
+ {id:'mi8',cruise:225,speedSource:'Газпром авиа · ориентир семейства Ми-8, модификация неизвестна',name:'Ми-8 · модификация неизвестна',short:'Ми-8',group:'Ми-8',note:'Выберите точную модификацию, если она известна. Погодные ограничения конкретного борта пока не подтверждены.'},
+ {id:'mi8t',name:'Ми-8Т',group:'Ми-8',cruise:225,note:'Пассажирские и грузовые перевозки.',source:'ЮТэйр',url:'https://www.utair.ru/about/aircrafts/helicopter/mi-8t/'},
+ {id:'mi8mtv1',name:'Ми-8МТВ-1',group:'Ми-8',cruise:230,tempMin:-50,tempMax:50,note:'Доставка вахтовых бригад; справочный температурный диапазон −50…+50 °C.',source:'ЮТэйр / Ростех',url:'https://rostec.ru/media/news/rostekh-zavershil-kontrakt-na-postavku-vosmi-mi-8mtv-1-dlya-gazprom-avia/'},
+ {id:'mi8amt',name:'Ми-8АМТ',group:'Ми-8',cruise:230,note:'Пассажирские и грузовые перевозки для нефтегазовых проектов.',source:'ЮТэйр',url:'https://www.utair.ru/about/aircrafts/helicopter/mi-171-mi-8amt/'},
+ {id:'mi8p',cruise:225,speedSource:'Газпром авиа · справочный ориентир семейства Ми-8',name:'Ми-8П',group:'Ми-8',note:'Пассажирская модификация. Подтверждённые параметры конкретного исполнения пока не подключены.',source:'Газпром авиа',url:'https://avia.gazprom.ru/about/air-fleet/helicopters/mi-8/'},
+ {id:'mi8ps',cruise:225,speedSource:'Газпром авиа · справочный ориентир семейства Ми-8',name:'Ми-8ПС',group:'Ми-8',note:'Пассажирское исполнение «Полусалон». Подтверждённые параметры конкретного исполнения пока не подключены.',source:'Газпром авиа',url:'https://avia.gazprom.ru/about/air-fleet/helicopters/mi-8/'},
+ {id:'mi171',name:'Ми-171',group:'Ми-171',cruise:230,note:'Семейство Ми-8/17; используется для нефтегазовых перевозок.',source:'ЮТэйр',url:'https://www.utair.ru/about/aircrafts/helicopter/mi-171-mi-8amt/'},
+ {id:'mi171a2',name:'Ми-171А2',group:'Ми-171',cruise:250,tempMin:-50,tempMax:50,note:'Современная модификация; справочный температурный диапазон −50…+50 °C.',source:'Вертолёты России / Ростех',url:'https://rostec.ru/media/pressrelease/vertolet-mi-171a2-poluchil-odobrenie-na-ekspluatatsiyu-v-gorakh/'},
+ {id:'mi171a3',name:'Ми-171А3',group:'Ми-171',note:'Морские нефтегазовые платформы. Числовые ограничения конкретной комплектации пока не подключены.',source:'Сахалинская Энергия',url:'https://www.sakhalinenergy.ru/ru/news/7166/'},
+ {id:'mi38',name:'Ми-38',group:'Другие модели',cruise:250,note:'Пассажирские и грузовые рейсы, в том числе на Колыме.',source:'Авиация Колымы',url:'https://aviakolyma.ru/?page_id=272'},
+ {id:'mi26t',cruise:255,speedSource:'Вертолёты России · rhc.ru/catalog/mi-26t/',name:'Ми-26Т',group:'Другие модели',note:'Тяжёлые грузовые работы. Подтверждённые параметры конкретного исполнения пока не подключены.',source:'ЮТэйр',url:'https://www.utair.ru/about/aircrafts/helicopter/'},
+ {id:'aw189',name:'AW189',group:'Другие модели',cruise:278,note:'Пассажирские и морские перевозки. Справочная скорость по данным ПАНХ.',source:'ПАНХ',url:'https://panh.ru/park-tehniki/aw189'},
+ {id:'aw139',name:'AW139',group:'Дополнительные модели',cruise:306,note:'Корпоративные и пассажирские перевозки. Не для каждого северного маршрута подтверждено вахтовое применение.',source:'Leonardo',url:'https://www.leonardo.com/documents/15646808/16752051/ComLDO_AW139_UK_VIP_Sales_04_10_2017_ENG_.pdf?t=1538990858206'},
+ {id:'ec155',cruise:278,speedSource:'Airbus Helicopters · EC155 B1 brochure · быстрый крейсерский режим 6000 ft',name:'EC155 B1',group:'Дополнительные модели',note:'Указан в парке «Газпром авиа». Числовые ограничения пока не подключены.',source:'Газпром авиа',url:'https://avia.gazprom.ru/about/'},
+ {id:'ec135',cruise:250,speedSource:'РУССЭЙР · EC135 T2; ориентир для T2+, исполнение борта может отличаться',name:'EC135 T2+',group:'Дополнительные модели',note:'Указан в парке «Газпром авиа». Числовые ограничения пока не подключены.',source:'Газпром авиа',url:'https://avia.gazprom.ru/about/'},
+ {id:'h125',name:'H125 / AS350 B3',group:'Дополнительные модели',cruise:235,note:'Лёгкий вертолёт: корпоративные полёты и мониторинг трубопроводов.',source:'ЮТэйр',url:'https://www.utair.ru/about/aircrafts/helicopter/h125-as350-b3/'},
+ {id:'ka32',cruise:200,speedSource:'ПАНХ · park-tehniki/ka-32-(aaost)',name:'Ка-32',group:'Дополнительные модели',note:'Указан в парке «ЮТэйр»; профиль конкретного борта пока не подключён.',source:'ЮТэйр',url:'https://www.utair.ru/about/aircrafts/helicopter/'},
+ {id:'other',name:'Другой вертолёт',group:'Не знаю / другой',note:'Используются выбранные вами общие ориентиры погоды.'},
+ {id:'unknown',name:'Не знаю модель',group:'Не знаю / другой',note:'Используются выбранные вами общие ориентиры погоды.'}
+];
+const airports=[{name:'Сургут · аэропорт',lat:61.342,lon:73.422,icao:'USRR'},{name:'Новый Уренгой · аэропорт',lat:66.07,lon:76.52,icao:'USMU'},{name:'Тюмень · Рощино',lat:57.19,lon:65.32,icao:'USTR'},{name:'Красноярск · аэропорт',lat:56.17,lon:92.49,icao:'UNKL'}];
+const api={aircraft,airports,get:id=>aircraft.find(a=>a.id===id)||aircraft[0]};root.Catalog=api;if(typeof module!=='undefined')module.exports=api;
+})(typeof window!=='undefined'?window:globalThis);

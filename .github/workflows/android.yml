@@ -18,11 +18,11 @@ jobs:
         with:
           gradle-version: '8.9'
       - name: Проверить погодную оценку
-        run: node tests/engine.test.cjs && node tests/forecast.test.cjs && node tests/cloud.test.cjs && node tests/index.test.cjs && node tests/audit.test.cjs
+        run: node --test flight-weather/tests/*.test.cjs
       - name: Собрать APK
-        run: gradle --no-daemon :app:assembleDebug :app:lintDebug
+        run: gradle -p flight-weather --no-daemon :app:assembleDebug :app:lintDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: Polet-Vahta-0.5.0
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: Polet-Vahta-0.16.0
+          path: flight-weather/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error

@@ -59,12 +59,12 @@ public class MainActivity extends Activity {
    try {
     c=(HttpURLConnection)new URL(url).openConnection();
     c.setConnectTimeout(18000); c.setReadTimeout(25000);
-    c.setRequestProperty("User-Agent","PoletVahta/0.15 (Android personal weather prototype)");
-    c.setRequestProperty("Accept","application/json");
+    c.setRequestProperty("User-Agent","PoletVahta/0.16 (Android personal weather prototype)");
+    c.setRequestProperty("Accept",textResponse?"text/csv,application/xml,text/xml,*/*":"application/json");
     c.setInstanceFollowRedirects(false);
     int status=c.getResponseCode();
     if(status==204){reply(id,"[]",null);return;}
-    if(status!=200) throw new Exception(status==429?"Источник временно ограничил запросы. Повторите позже.":"Источник погоды ответил с ошибкой "+status);
+    if(status!=200) throw new Exception(status==429?"Источник временно ограничил запросы (HTTP 429). Повторите позже.":"Источник погоды ответил с ошибкой "+status);
     try(InputStream in=c.getInputStream(); ByteArrayOutputStream out=new ByteArrayOutputStream()) {
      byte[] b=new byte[8192]; int n;
      while((n=in.read(b))!=-1) {out.write(b,0,n); if(out.size()>4000000) throw new Exception("Ответ источника слишком большой");}
@@ -110,7 +110,7 @@ public class MainActivity extends Activity {
      double lat=Double.parseDouble(a[i]),lon=Double.parseDouble(b[i]);
      if(!Double.isFinite(lat)||!Double.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180) throw new Exception();
     }
-    request(id,"https://api.open-meteo.com/v1/forecast?latitude="+Uri.encode(lats)+"&longitude="+Uri.encode(lons)+"&hourly=temperature_2m,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover_low,weather_code,precipitation,is_day&wind_speed_unit=ms&timezone=GMT&forecast_days=3");
+    request(id,"https://api.open-meteo.com/v1/forecast?latitude="+Uri.encode(lats)+"&longitude="+Uri.encode(lons)+"&hourly=temperature_2m,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover_low,weather_code,precipitation,is_day&wind_speed_unit=ms&timezone=GMT&forecast_days=4");
    }catch(Exception e){reply(id,null,"Проверьте координаты маршрута");}
   }
   @JavascriptInterface public void search(String id,String query) {
