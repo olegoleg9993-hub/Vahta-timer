@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
    try {
     c=(HttpURLConnection)new URL(url).openConnection();
     c.setConnectTimeout(18000); c.setReadTimeout(25000);
-    c.setRequestProperty("User-Agent","PoletVahta/0.8 (Android personal weather prototype)");
+    c.setRequestProperty("User-Agent","PoletVahta/0.10 (Android personal weather prototype)");
     c.setRequestProperty("Accept","application/json");
     c.setInstanceFollowRedirects(false);
     int status=c.getResponseCode();
@@ -110,7 +110,7 @@ public class MainActivity extends Activity {
      double lat=Double.parseDouble(a[i]),lon=Double.parseDouble(b[i]);
      if(!Double.isFinite(lat)||!Double.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180) throw new Exception();
     }
-    request(id,"https://api.open-meteo.com/v1/forecast?latitude="+Uri.encode(lats)+"&longitude="+Uri.encode(lons)+"&hourly=temperature_2m,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover_low,weather_code,precipitation,is_day&wind_speed_unit=ms&timezone=GMT&forecast_days=4");
+    request(id,"https://api.open-meteo.com/v1/forecast?latitude="+Uri.encode(lats)+"&longitude="+Uri.encode(lons)+"&hourly=temperature_2m,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover_low,weather_code,precipitation,is_day&wind_speed_unit=ms&timezone=GMT&forecast_days=3");
    }catch(Exception e){reply(id,null,"Проверьте координаты маршрута");}
   }
   @JavascriptInterface public void search(String id,String query) {
