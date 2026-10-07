@@ -12,7 +12,7 @@ function assess(h,i,t){t=Object.assign({},defaults,t);const x={visibility:at(h,'
  if(g.wind>0&&g.wind<3)reasons.push('Сильный ветер');
  if(g.gust>0&&g.gust<3)reasons.push('Порывы ветра');
  if(g.rain>0&&g.rain<3)reasons.push('Интенсивные осадки');
- if(g.low===1)reasons.push('Много облаков нижнего яруса; их высота неизвестна');
+ if(g.low===1)reasons.push('Значительная облачность нижнего яруса');
  if([95,96,99].includes(x.code)){level=2;reasons.push('Прогноз грозы');}
  if([56,57,66,67].includes(x.code)){level=2;reasons.push('Прогноз переохлаждённых осадков');}
  if([45,48].includes(x.code)){level=Math.max(level,1);reasons.push('Прогноз тумана');}
@@ -46,7 +46,7 @@ function sampleModel(data,ms,t){
 function severity(v,red,yellow,reverse=false){
  if(!valid(v))return null;
  if(reverse){if(v<=red)return 1;if(v<yellow)return .4+.6*(yellow-v)/(yellow-red);return Math.max(0,.4*(2*yellow-v)/yellow);}
- if(v>=red)return 1;if(v>yellow)return .4+.6*(v-yellow)/(red-yellow);return Math.max(0,.4*(v-yellow/2)/(yellow/2));
+ if(v>=red)return 1;if(v>yellow)return .4+.6*(v-yellow)/(red-yellow);return Math.max(0,.4*v/yellow);
 }
 function mergeForecast(base,update){const out={...base};for(const[k,v]of Object.entries(update))if(v!==null&&v!==undefined&&v!==''&&(k!=='clouds'||Array.isArray(v)&&v.length))out[k]=v;return out;}
 function tafAt(taf,ms){
@@ -74,7 +74,7 @@ function augment(result,taf,ms,t,aircraft){
  const forecast=tafAt(taf,ms);
  if(forecast){
   r.aviation=forecast;
-  let clouds=forecast.variants.map(ceilingOf);if(clouds.every(c=>c.known)){const values=clouds.map(c=>c.value).filter(valid);r.cloud={known:true,value:values.length?Math.min(...values):null,clear:!values.length};}
+  let clouds=forecast.variants.map(ceilingOf);if(clouds.every(c=>c.known)){const values=clouds.map(c=>c.value).filter(valid);r.cloud={known:true,value:values.length?Math.min(...values):null,clear:!values.length,source:'TAF'};}
   const toMeters=v=>{const n=typeof v==='number'?v:parseFloat(v);return Number.isFinite(n)?n*1609.344:null;};
   const vis=forecast.variants.map(g=>toMeters(g.visib)).filter(valid),winds=forecast.variants.map(g=>valid(g.wspd)?g.wspd*.514444:null).filter(valid),gusts=forecast.variants.map(g=>valid(g.wgst)?g.wgst*.514444:null).filter(valid);
   if(vis.length)r.x.visibility=result.x.visibility===null?Math.min(...vis):Math.min(result.x.visibility,...vis);
@@ -94,21 +94,25 @@ function augment(result,taf,ms,t,aircraft){
  if(r.missing&&r.level<2)r.level=3;
  return r;
 }
-function weatherIndex(results,t){
- t={...defaults,...t};if(!results.length||results.some(r=>r.missing))return null;
- const penalties=[];
- for(const r of results){
-  penalties.push(severity(r.x.visibility,t.visRed,t.visYellow,true),severity(r.x.wind,t.windRed,t.windYellow),severity(r.x.gust,t.gustRed,t.gustYellow),severity(r.x.rain,t.rainRed,t.rainYellow));
-  if(valid(r.x.low))penalties.push(r.x.low>=80?.4:Math.max(0,(r.x.low-40)/100));
-  if([95,96,99,56,57,66,67].includes(r.x.code)||r.temperatureOutside)penalties.push(1);
-  else if([45,48].includes(r.x.code))penalties.push(.6);
-  else if([71,73,75,77,85,86].includes(r.x.code))penalties.push(.4);
-  if(r.cloud&&r.cloud.value!==null)penalties.push(severity(r.cloud.value,t.cloudRed,t.cloudYellow,true));
-  if(r.aviation){for(const g of r.aviation.variants){const wx=g.wxString||'';if(/TS|FZRA|FZDZ/.test(wx))penalties.push(1);else if(/FZFG/.test(wx))penalties.push(.8);else if(/FG/.test(wx))penalties.push(.6);else if(/SN/.test(wx))penalties.push(.4);}}
- }
- if(penalties.some(x=>x===null))return null;
- return Math.round(100*(1-Math.max(0,...penalties)));
+function indexDetails(results,t){
+ t={...defaults,...t};const required=[['visibility','Видимость'],['wind','Ветер'],['gust','Порывы'],['rain','Осадки'],['code','Явления погоды'],['temp','Температура'],['direction','Направление ветра'],['day','День / ночь'],['low','Облачность нижнего яруса']];
+ const missing=[];required.forEach(([key,name])=>{const points=results.map((r,i)=>valid(r.x[key])?null:i).filter(i=>i!==null);if(points.length)missing.push({name,points});});
+ const points=results.map((r,i)=>r.cloud?.known&&(r.cloud.clear||valid(r.cloud.value))?null:i).filter(i=>i!==null);if(points.length)missing.push({name:'Высота облаков / облачный потолок',points});
+ if(!results.length)missing.push({name:'Погодный прогноз',points:[]});
+ if(missing.length)return {score:null,missing,points:[]};
+ const breakdown=results.map(r=>{
+  const factors=[{name:'Видимость',value:r.x.visibility,unit:'м',penalty:severity(r.x.visibility,t.visRed,t.visYellow,true)},
+   {name:'Ветер',value:r.x.wind,unit:'м/с',penalty:severity(r.x.wind,t.windRed,t.windYellow)},
+   {name:'Порывы',value:r.x.gust,unit:'м/с',penalty:severity(r.x.gust,t.gustRed,t.gustYellow)},
+   {name:'Осадки',value:r.x.rain,unit:'мм/ч',penalty:severity(r.x.rain,t.rainRed,t.rainYellow)},
+   {name:'Облачный потолок',value:r.cloud.clear?null:r.cloud.value,unit:'м',clear:r.cloud.clear,source:r.cloud.source,penalty:r.cloud.clear?0:severity(r.cloud.value,t.cloudRed,t.cloudYellow,true)}];
+  const adverse=[95,96,99,56,57,66,67].includes(r.x.code)||r.temperatureOutside||(r.aviation?.variants||[]).some(g=>/TS|FZRA|FZDZ/.test(g.wxString||''));
+  if(adverse)factors.push({name:r.temperatureOutside?'Температура вне справочного диапазона':'Гроза / переохлаждённые осадки',penalty:1});
+  // Product is a chosen weather scoring rule, not multiplication of event probabilities.
+  const raw=100*factors.reduce((acc,f)=>acc*(1-f.penalty),1);return {raw,score:Math.round(raw),factors};
+ });return {score:Math.round(Math.min(...breakdown.map(x=>x.raw))),missing:[],points:breakdown};
 }
+function weatherIndex(results,t){return indexDetails(results,t).score;}
 function coverage(results){
  const fields=[['visibility','Видимость'],['wind','Ветер'],['gust','Порывы'],['direction','Направление ветра'],['low','Облачность нижнего яруса'],['rain','Осадки'],['temp','Температура'],['code','Явления погоды'],['day','День / ночь']];
  const list=fields.map(([key,name])=>({name,status:results.every(r=>valid(r.x[key]))?'есть':'нет'}));
@@ -126,7 +130,7 @@ function parseCloudCsv(csv){
  if(!rows.length)throw Error('В источнике нет часов прогноза облаков.');return rows.sort((a,b)=>a.ms-b.ms);
 }
 function cloudAt(rows,ms){if(!Array.isArray(rows)||!rows.length||ms<rows[0].ms||ms>rows[rows.length-1].ms)return null;const exact=rows.find(r=>r.ms===ms);if(exact)return valid(exact.value)?{known:true,value:exact.value,clear:false,source:'GFS',approximate:true}:null;const hi=rows.findIndex(r=>r.ms>ms);if(hi<1||rows[hi].ms-rows[hi-1].ms>3*3600000||!valid(rows[hi].value)||!valid(rows[hi-1].value))return null;return {known:true,value:Math.min(rows[hi].value,rows[hi-1].value),clear:false,source:'GFS',approximate:true};}
-function withCloud(r,cloud,t){if(!cloud)return r;const out={...r,g:{...r.g},reasons:r.reasons.slice()};if(r.cloud?.known){out.cloud={...cloud,value:r.cloud.clear?cloud.value:Math.min(r.cloud.value,cloud.value),source:'TAF + GFS'};}else out.cloud={...cloud};out.g.cloud=grade(out.cloud.value,t.cloudRed,t.cloudYellow,true);if(out.g.cloud>0)out.reasons.push('Низкие облака по '+out.cloud.source);out.reasons=out.reasons.map(x=>x==='Много облаков нижнего яруса; их высота неизвестна'?'Много облаков нижнего яруса':x);out.level=Math.max(out.level===3?0:out.level,out.g.cloud);if(out.missing&&out.level<2)out.level=3;return out;}
+function withCloud(r,cloud,t){if(!cloud)return r;const out={...r,g:{...r.g},reasons:r.reasons.slice()};if(r.cloud?.known){out.cloud={...cloud,value:r.cloud.clear?cloud.value:Math.min(r.cloud.value,cloud.value),source:'TAF + GFS'};}else out.cloud={...cloud};out.g.cloud=grade(out.cloud.value,t.cloudRed,t.cloudYellow,true);if(out.g.cloud>0)out.reasons.push('Низкие облака по '+out.cloud.source);out.reasons=out.reasons.map(x=>x==='Значительная облачность нижнего яруса'?'Много облаков нижнего яруса':x);out.level=Math.max(out.level===3?0:out.level,out.g.cloud);if(out.missing&&out.level<2)out.level=3;return out;}
 function compass(deg){if(!valid(deg))return '—';const dirs=['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'];return dirs[Math.round(deg/45)%8]+' '+Math.round(deg)+'°';}
-const api={defaults,valid,assess,routePoints,combine,weatherName,sampleModel,tafAt,ceilingOf,augment,weatherIndex,coverage,compass,severity,parseCloudCsv,cloudAt,withCloud};root.Engine=api;if(typeof module!=='undefined')module.exports=api;
+const api={defaults,valid,assess,routePoints,combine,weatherName,sampleModel,tafAt,ceilingOf,augment,weatherIndex,indexDetails,coverage,compass,severity,parseCloudCsv,cloudAt,withCloud};root.Engine=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
