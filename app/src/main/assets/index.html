@@ -1,0 +1,20 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#0b1722"><title>Полёт • Вахта</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><div class="brand"><div class="logo"><svg viewBox="0 0 48 48" fill="none"><path d="M7 9h34M24 9v7M10 39h28M16 33l-2 6m16-6 2 6m6-17 7-4v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M15 17h13c6 0 10 5 10 10l-4 6H14C4 33 4 17 15 17Z" fill="currentColor"/><path d="M25 20h4c3 0 5 3 6 6H25Z" fill="#143245"/></svg></div><div><b>Полёт <span>• Вахта</span></b><small>Погода на пути домой</small></div></div><button class="icon" id="helpBtn" aria-label="Как работает оценка">?</button></header>
+<main>
+<section id="welcome" class="welcome card"><span class="eyebrow">ВАШ МАРШРУТ</span><h1>Когда погода<br>станет лучше?</h1><p>Выберите, откуда и куда летит вертолёт. Посмотрим погодные факторы на ближайшие три дня.</p><div class="flight-art"><span class="point"></span><span class="dash"></span><svg viewBox="0 0 48 48"><path d="M7 9h34M24 9v7M10 39h28M16 33l-2 6m16-6 2 6m6-17 7-4v10" stroke="currentColor" stroke-width="2.5" fill="none"/><path d="M15 17h13c6 0 10 5 10 10l-4 6H14C4 33 4 17 15 17Z" fill="currentColor"/></svg><span class="dash"></span><span class="point end"></span></div><button class="primary" id="startBtn">Настроить маршрут</button><small>Без регистрации и отдельного сервера</small></section>
+<div id="dashboard" hidden>
+<button id="routeBtn" class="route card"><div class="route-label">МАРШРУТ <span>Изменить ↗</span></div><div class="route-names"><b id="fromName"></b><span>→</span><b id="toName"></b></div><small id="routeMeta"></small></button>
+<div class="update-line"><span id="updated">Погода ещё не загружена</span><button id="refreshBtn">↻ Обновить</button></div>
+<div id="message" hidden role="status"></div>
+<div class="tabs" id="days"></div>
+<section id="summary" class="summary card"></section>
+<div class="section-title"><h2>Почасовой прогноз</h2><button id="settingsBtn">Пороги оценки</button></div>
+<p class="caption" id="timezone"></p><div id="hours"></div>
+<section id="observations" class="card" hidden></section>
+<section class="card limitations"><div class="section-title"><h2>Что пока неизвестно</h2><span class="tag">v0.1</span></div><p>Нет прогноза высоты нижней границы облаков, обледенения и турбулентности. Пять точек не покрывают весь маршрут. Прогноз у поверхности не описывает условия на высоте полёта.</p><p>Оценка показывает погодные факторы, а решение о рейсе принимает перевозчик.</p></section>
+</div>
+<footer>Open-Meteo · модельный прогноз<br>Фактические сводки: Aviation Weather Center, если доступны</footer>
+</main>
+<div id="modal" class="overlay" hidden><section class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-head"><h2 id="modalTitle"></h2><button id="closeModal" class="icon" aria-label="Закрыть">×</button></div><div id="modalBody"></div></section></div>
+<script src="engine.js"></script><script src="app.js"></script></body></html>
