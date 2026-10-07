@@ -103,9 +103,9 @@ function indexDetails(results,t){
  
  const breakdown=results.map(r=>{
   const wind=severity(r.x.wind,t.windRed,t.windYellow),gust=severity(r.x.gust,t.gustRed,t.gustYellow);
-  const factors=[{name:'Видимость',value:r.x.visibility,unit:'м',penalty:severity(r.x.visibility,t.visRed,t.visYellow,true)},
-   {name:'Ветер / порывы',value:r.x.wind,gust:r.x.gust,unit:'м/с',penalty:wind===null?gust:gust===null?wind:Math.max(wind,gust)},
-   {name:'Осадки',value:r.x.rain,unit:'мм/ч',penalty:severity(r.x.rain,t.rainRed,t.rainYellow)},
+  const factors=[{name:'Видимость',source:r.sources?.visibility,value:r.x.visibility,unit:'м',penalty:severity(r.x.visibility,t.visRed,t.visYellow,true)},
+   {name:'Ветер / порывы',source:[...new Set([r.sources?.wind,r.sources?.gust].filter(Boolean))].join(' + '),value:r.x.wind,gust:r.x.gust,unit:'м/с',penalty:wind===null?gust:gust===null?wind:Math.max(wind,gust)},
+   {name:'Осадки',source:r.sources?.rain,value:r.x.rain,unit:'мм/ч',penalty:severity(r.x.rain,t.rainRed,t.rainYellow)},
    {name:'Облачный потолок',value:r.cloud?.clear?null:r.cloud?.value,unit:'м',clear:r.cloud?.clear,source:r.cloud?.source,penalty:r.cloud?.known?(r.cloud.clear?0:severity(r.cloud.value,t.cloudRed,t.cloudYellow,true)):null}].filter(f=>f.penalty!==null);
   const adverse=[95,96,99,56,57,66,67].includes(r.x.code)||r.temperatureOutside||(r.aviation?.variants||[]).some(g=>/TS|FZRA|FZDZ/.test(g.wxString||''));
   if(adverse)factors.push({name:r.temperatureOutside?'Температура вне справочного диапазона':'Гроза / переохлаждённые осадки',penalty:1});

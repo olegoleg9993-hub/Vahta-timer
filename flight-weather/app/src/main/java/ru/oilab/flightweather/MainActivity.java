@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
    try {
     c=(HttpURLConnection)new URL(url).openConnection();
     c.setConnectTimeout(18000); c.setReadTimeout(25000);
-    c.setRequestProperty("User-Agent","PoletVahta/0.5 (Android personal weather prototype)");
+    c.setRequestProperty("User-Agent","PoletVahta/0.7 (Android personal weather prototype)");
     c.setRequestProperty("Accept","application/json");
     c.setInstanceFollowRedirects(false);
     int status=c.getResponseCode();
@@ -87,6 +87,18 @@ public class MainActivity extends Activity {
    }catch(Exception e){reply(id,null,"Проверьте параметры запроса высоты облаков");}
   }
 
+  @JavascriptInterface public void gfsWeather(String id,String run,String lat,String lon,String start,String end,String group) {
+   try {
+    double a=Double.parseDouble(lat),b=Double.parseDouble(lon);
+    if(!Double.isFinite(a)||!Double.isFinite(b)||Math.abs(a)>90||Math.abs(b)>180||run==null||!run.matches("[0-9]{8}_[0-9]{4}")||start==null||end==null||!start.matches("[0-9T:Z-]{20}")||!end.matches("[0-9T:Z-]{20}"))throw new Exception();
+    String variables,level="";
+    if("surface".equals(group)) variables="Visibility_surface,Wind_speed_gust_surface,Precipitation_rate_surface";
+    else if("temp".equals(group)){variables="Temperature_height_above_ground";level="&vertCoord=2";}
+    else if("wind".equals(group)){variables="u-component_of_wind_height_above_ground,v-component_of_wind_height_above_ground";level="&vertCoord=10";}
+    else throw new Exception();
+    request(id,"https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/GFS/Global_0p25deg/GFS_Global_0p25deg_"+run+".grib2?var="+Uri.encode(variables)+"&latitude="+Uri.encode(lat)+"&longitude="+Uri.encode(lon)+"&time_start="+Uri.encode(start)+"&time_end="+Uri.encode(end)+"&accept=csv"+level,true);
+   }catch(Exception e){reply(id,null,"Проверьте параметры резервного прогноза GFS");}
+  }
   @JavascriptInterface public void close() { runOnUiThread(()->finish()); }
   @JavascriptInterface public String load() {return getPreferences(0).getString("state","{}");}
   @JavascriptInterface public void save(String value) { if(value!=null && value.length()<2000000) getPreferences(0).edit().putString("state",value).apply(); }
