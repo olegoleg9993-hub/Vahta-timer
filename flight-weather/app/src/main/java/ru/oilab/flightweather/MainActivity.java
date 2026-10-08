@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
    try {
     c=(HttpURLConnection)new URL(url).openConnection();
     c.setConnectTimeout(18000); c.setReadTimeout(25000);
-    c.setRequestProperty("User-Agent","PoletVahta/0.18 (https://github.com/olegoleg9993-hub/Vahta-timer)");
+    c.setRequestProperty("User-Agent","PoletVahta/0.19 (https://github.com/olegoleg9993-hub/Vahta-timer)");
     c.setRequestProperty("Accept",textResponse?"text/csv,application/xml,text/xml,*/*":"application/json");
     c.setInstanceFollowRedirects(false);
     int status=c.getResponseCode();
@@ -83,7 +83,7 @@ public class MainActivity extends Activity {
    try {
     double a=Double.parseDouble(lat),b=Double.parseDouble(lon);
     if(!Double.isFinite(a)||!Double.isFinite(b)||Math.abs(a)>90||Math.abs(b)>180||run==null||!run.matches("[0-9]{8}_[0-9]{4}")||start==null||end==null||!start.matches("[0-9T:Z-]{20}")||!end.matches("[0-9T:Z-]{20}"))throw new Exception();
-    request(id,"https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/GFS/Global_0p25deg/GFS_Global_0p25deg_"+run+".grib2?var=Geopotential_height_cloud_ceiling&var=Geopotential_height_surface&latitude="+Uri.encode(lat)+"&longitude="+Uri.encode(lon)+"&time_start="+Uri.encode(start)+"&time_end="+Uri.encode(end)+"&accept=csv",true);
+    request(id,"https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/GFS/Global_0p25deg/GFS_Global_0p25deg_"+run+".grib2?var=Geopotential_height_cloud_ceiling&var=Geopotential_height_surface&var=Visibility_surface&latitude="+Uri.encode(lat)+"&longitude="+Uri.encode(lon)+"&time_start="+Uri.encode(start)+"&time_end="+Uri.encode(end)+"&accept=csv",true);
    }catch(Exception e){reply(id,null,"Проверьте параметры запроса высоты облаков");}
   }
 

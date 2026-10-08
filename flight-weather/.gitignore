@@ -6,3 +6,7 @@ local.properties
 *.keystore
 *.jks
 *.apk
+
+/build-manual/
+*.jks
+*.keystore

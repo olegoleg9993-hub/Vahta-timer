@@ -1,0 +1,6 @@
+time,station,latitude[unit="degrees_north"],longitude[unit="degrees_east"],Geopotential_height_cloud_ceiling[unit="gpm"],Geopotential_height_surface[unit="gpm"],Visibility_surface[unit="m"]
+2026-10-08T00:00:00Z,GridPointRequestedAt[65.940N_80.653E],66.000,80.750,38.90989,29.179375,99.773026
+2026-10-08T03:00:00Z,GridPointRequestedAt[65.940N_80.653E],66.000,80.750,111.27097,29.179375,2560.771
+2026-10-08T06:00:00Z,GridPointRequestedAt[65.940N_80.653E],66.000,80.750,930.1335,29.179375,24134.816
+2026-10-08T09:00:00Z,GridPointRequestedAt[65.940N_80.653E],66.000,80.750,948.34784,29.179375,24134.818
+2026-10-08T12:00:00Z,GridPointRequestedAt[65.940N_80.653E],66.000,80.750,1091.0933,29.179375,24135.006
