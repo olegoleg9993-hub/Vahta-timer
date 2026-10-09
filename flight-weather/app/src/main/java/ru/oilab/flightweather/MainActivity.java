@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
    try {
     c=(HttpURLConnection)new URL(url).openConnection();
     c.setConnectTimeout(18000); c.setReadTimeout(25000);
-    c.setRequestProperty("User-Agent","PoletVahta/0.19 (https://github.com/olegoleg9993-hub/Vahta-timer)");
+    c.setRequestProperty("User-Agent","PoletVahta/0.20 (https://github.com/olegoleg9993-hub/Vahta-timer)");
     c.setRequestProperty("Accept",textResponse?"text/csv,application/xml,text/xml,*/*":"application/json");
     c.setInstanceFollowRedirects(false);
     int status=c.getResponseCode();
@@ -99,6 +99,21 @@ public class MainActivity extends Activity {
     request(id,"https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/GFS/Global_0p25deg/GFS_Global_0p25deg_"+run+".grib2?var="+Uri.encode(variables)+"&latitude="+Uri.encode(lat)+"&longitude="+Uri.encode(lon)+"&time_start="+Uri.encode(start)+"&time_end="+Uri.encode(end)+"&accept=csv"+level,true);
    }catch(Exception e){reply(id,null,"Проверьте параметры резервного прогноза GFS");}
   }
+  @JavascriptInterface public void synop(String id,String code,String begin,String end) {
+   if(code==null||!code.matches("[0-9]{5}")||begin==null||end==null||!begin.matches("[0-9]{12}")||!end.matches("[0-9]{12}")){reply(id,null,"Некорректные параметры станции");return;}
+   request(id,"https://www.ogimet.com/cgi-bin/getsynop?block="+code+"&begin="+begin+"&end="+end+"&lang=eng&header=yes",true);
+  }
+  @JavascriptInterface public void icingProfile(String id,String run,String lat,String lon,String start,String end,String pressure,String group) {
+   try {
+    double a=Double.parseDouble(lat),b=Double.parseDouble(lon);
+    if(!Double.isFinite(a)||!Double.isFinite(b)||Math.abs(a)>90||Math.abs(b)>180||run==null||!run.matches("[0-9]{8}_[0-9]{4}")||start==null||end==null||!start.matches("[0-9T:Z-]{20}")||!end.matches("[0-9T:Z-]{20}")||!("97500".equals(pressure)||"95000".equals(pressure)||"92500".equals(pressure)))throw new Exception();
+    String variables;
+    if("air".equals(group))variables="Temperature_isobaric,Relative_humidity_isobaric,Geopotential_height_isobaric";
+    else if("water".equals(group))variables="Cloud_mixing_ratio_isobaric,Ice_water_mixing_ratio_isobaric";
+    else throw new Exception();
+    request(id,"https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/GFS/Global_0p25deg/GFS_Global_0p25deg_"+run+".grib2?var="+Uri.encode(variables)+"&latitude="+Uri.encode(lat)+"&longitude="+Uri.encode(lon)+"&time_start="+Uri.encode(start)+"&time_end="+Uri.encode(end)+"&vertCoord="+pressure+"&accept=csv",true);
+   }catch(Exception e){reply(id,null,"Некорректные параметры прогноза на высоте");}
+  }
   @JavascriptInterface public void close() { runOnUiThread(()->finish()); }
   @JavascriptInterface public String load() {return getPreferences(0).getString("state","{}");}
   @JavascriptInterface public void save(String value) { if(value!=null && value.length()<2000000) getPreferences(0).edit().putString("state",value).apply(); }
@@ -110,7 +125,7 @@ public class MainActivity extends Activity {
      double lat=Double.parseDouble(a[i]),lon=Double.parseDouble(b[i]);
      if(!Double.isFinite(lat)||!Double.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180) throw new Exception();
     }
-    request(id,"https://api.open-meteo.com/v1/forecast?latitude="+Uri.encode(lats)+"&longitude="+Uri.encode(lons)+"&hourly=temperature_2m,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover_low,weather_code,precipitation,is_day&wind_speed_unit=ms&timezone=GMT&forecast_days=4");
+    request(id,"https://api.open-meteo.com/v1/forecast?latitude="+Uri.encode(lats)+"&longitude="+Uri.encode(lons)+"&hourly=temperature_2m,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover_low,weather_code,precipitation,is_day,relative_humidity_2m,rain,snowfall&wind_speed_unit=ms&timezone=GMT&forecast_days=4");
    }catch(Exception e){reply(id,null,"Проверьте координаты маршрута");}
   }
   @JavascriptInterface public void secondaryWeather(String id,String lat,String lon) {

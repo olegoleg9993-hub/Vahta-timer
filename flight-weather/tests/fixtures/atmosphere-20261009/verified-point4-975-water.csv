@@ -1,0 +1,14 @@
+time,station,latitude[unit="degrees_north"],longitude[unit="degrees_east"],Cloud_mixing_ratio_isobaric[unit="kg/kg"],Ice_water_mixing_ratio_isobaric[unit="kg/kg"]
+2026-10-09T06:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,0.0
+2026-10-09T09:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,0.0
+2026-10-09T12:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,0.0
+2026-10-09T15:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,0.0
+2026-10-09T18:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,0.0
+2026-10-09T21:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,0.0
+2026-10-10T00:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,2.08E-7
+2026-10-10T03:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,3.9976E-5
+2026-10-10T06:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,2.8078E-4,1.3612E-5
+2026-10-10T09:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,1.0048E-4,1.48E-7
+2026-10-10T12:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,0.0
+2026-10-10T15:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,0.0
+2026-10-10T18:00:00Z,GridPointRequestedAt[65.910N_78.209E],66.000,78.250,0.0,0.0
